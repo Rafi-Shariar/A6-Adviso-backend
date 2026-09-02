@@ -6,9 +6,8 @@ import { sendResponse } from "../../utils/sendResponse";
 import { AuthServices } from "./auth.service";
 
 const registerUser = catchAsync(async (req: Request, res: Response) => {
-
 	const payload = req.body;
-	await AuthServices.registerUserIntoDB(payload)
+	await AuthServices.registerUserIntoDB(payload);
 
 	sendResponse(res, {
 		statusCode: httpStatus.OK,
@@ -18,6 +17,20 @@ const registerUser = catchAsync(async (req: Request, res: Response) => {
 	});
 });
 
+const verifyEmail = catchAsync(async (req: Request, res: Response) => {
+	
+	const result = await AuthServices.verifyUserEmail(req.body)
+
+	sendResponse(res, {
+		statusCode: httpStatus.OK,
+		success: true,
+		message: "Email verified successful. Welcome to ADVISO",
+		data: result,
+	});
+});
+
+
 export const AuthController = {
-	registerUser
+	registerUser,
+	verifyEmail
 };

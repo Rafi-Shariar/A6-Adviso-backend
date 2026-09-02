@@ -5,6 +5,12 @@ import { AuthController } from "./auth.controller";
 
 const router = Router();
 
-router.post('/register', validateRequest(AuthValidation.registerSchema), AuthController.registerUser)
+router.post(
+	"/register",
+	validateRequest(AuthValidation.registerZodSchema),
+	AuthController.registerUser,
+);
+
+router.post('/verify-email', validateRequest(AuthValidation.EmailVerifyZodSchema), AuthController.verifyEmail)
 
 export const AuthRoutes = router;

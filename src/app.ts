@@ -30,13 +30,7 @@ app.use(express.json());
 app.use(cookieParser());
 
 //routes
-app.use('/api/v1/auth', AuthRoutes)
-
-
-
-
-
-
+app.use("/api/v1/auth", AuthRoutes);
 
 // Basic route
 app.get("/", async (req: Request, res: Response) => {

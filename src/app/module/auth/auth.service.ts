@@ -1,7 +1,7 @@
 import bcrypt from "bcryptjs";
 import { prisma } from "../../lib/prisma";
 import { AppError } from "../../utils/AppError";
-import { IRegisterUser } from "./auth.interface";
+import { IRegisterUser, IVerifyEmailPayload } from "./auth.interface";
 import httpStatus from "http-status";
 import crypto from "crypto";
 import { redisClient } from "../../lib/redis";
@@ -9,66 +9,156 @@ import path from "path";
 import ejs from "ejs";
 import { transporter } from "../../lib/nodemailer";
 import config from "../../config";
+import { AccountStatus, Role } from "../../../generated/prisma/enums";
+import { ILoginUserPayloadExample } from "../example/example.interface";
+import { jwtUtils } from "../../utils/jwt";
+import { SignOptions } from "jsonwebtoken";
 
-const registerUserIntoDB = async (payload : IRegisterUser) => {
+const registerUserIntoDB = async (payload: IRegisterUser) => {
+  const { name, timezone, password } = payload;
 
-    const {name, timezone, password} = payload
+  const email = payload.email.trim().toLocaleLowerCase();
 
-    const email = payload.email.trim().toLocaleLowerCase()
+  const isUserExits = await prisma.user.findUnique({
+    where: { email },
+  });
 
-    const isUserExits = await prisma.user.findUnique({
-        where : {email}
-    })
+  if (isUserExits) {
+    throw new AppError(
+      httpStatus.CONFLICT,
+      "User with this email already exists.",
+    );
+  }
 
-    if(isUserExits){
-        throw new AppError(httpStatus.CONFLICT, "User with this email already exists.")
+  const hashedPassword = await bcrypt.hash(password, 10);
+
+  //OTP in redis
+  const expirationSeconds = 5 * 60;
+  const otpKey = `user-registration-otp:${email}`;
+  const otpValue = crypto.randomInt(100000, 1000000).toString();
+
+  await redisClient.set(otpKey, otpValue, {
+    expiration: {
+      type: "EX",
+      value: expirationSeconds,
+    },
+  });
+
+  //User Data in Redis
+  const userRegistrationKey = `user-registration-data:${email}`;
+  const redisUserDataPayload = {
+    name,
+    email,
+    timezone,
+    password: hashedPassword,
+  };
+
+  await redisClient.set(
+    userRegistrationKey,
+    JSON.stringify(redisUserDataPayload),
+    {
+      expiration: {
+        type: "EX",
+        value: expirationSeconds,
+      },
+    },
+  );
+
+  //sending Email
+  const tempatePath = path.join(
+    process.cwd(),
+    "src/app/templates/verify-email.ejs",
+  );
+
+  const templateData = {
+    name,
+    email,
+    otp: otpValue,
+  };
+
+  const html = await ejs.renderFile(tempatePath, templateData);
+
+  await transporter.sendMail({
+    from: config.email_sender,
+    to: email,
+    subject: "Adviso - Email Verification",
+    html,
+  });
+};
+
+const verifyUserEmail = async (payload: IVerifyEmailPayload) => {
+  const otp = payload.otp;
+  const email = payload.email.trim().toLowerCase();
+
+  const isUserExist = await prisma.user.findUnique({
+    where: { email },
+  });
+
+  if (isUserExist?.accountStatus === "BLOCKED") {
+    throw new AppError(httpStatus.FORBIDDEN, "User is Blocked");
+  }
+
+  if (isUserExist?.isEmailVerified) {
+    throw new AppError(httpStatus.CONFLICT, "Email ALready Verified");
+  }
+
+  if (
+    isUserExist?.isDeleted ||
+    isUserExist?.accountStatus === AccountStatus.SUSPENDED
+  ) {
+    throw new AppError(
+      httpStatus.FORBIDDEN,
+      `User is ${isUserExist.accountStatus}`,
+    );
+  }
+
+  const otpKey = `user-registration-otp:${email}`;
+
+  const redisOtp = await redisClient.get(otpKey);
+
+  if (!redisOtp) {
+    throw new AppError(httpStatus.BAD_REQUEST, "Invalid OTP");
+  }
+
+  if (redisOtp !== otp) {
+    throw new AppError(httpStatus.BAD_REQUEST, "OTP Does Not Match");
+  }
+
+  await redisClient.del(otpKey);
+
+  const userRegistrationKey = `user-registration-data:${email}`;
+
+  const redisPatientData = await redisClient.get(userRegistrationKey);
+
+  if (!redisPatientData) {
+    throw new AppError(httpStatus.NOT_FOUND, "Patient Doesn't Exist");
+  }
+
+  const userPayload: IRegisterUser = JSON.parse(redisPatientData);
+
+  const createdUser = await prisma.user.create({
+    data : {
+        name : userPayload.name,
+        email : userPayload.email,
+        timezone : userPayload.timezone,
+        password : userPayload.password,
+        isEmailVerified : true,
+        role : Role.USER,
+    },
+    omit : {
+        password : true
     }
+  })
 
-    const hashedPassword = await bcrypt.hash(password, 10)
+  await redisClient.del(userRegistrationKey)
 
-
-    //OTP in redis
-    const expirationSeconds = 5 * 60;
-	const otpKey = `user-registration-otp:${email}`;
-	const otpValue = crypto.randomInt(100000, 1000000).toString();
-
-	await redisClient.set(otpKey, otpValue, {
-		expiration: {
-			type: "EX",
-			value: expirationSeconds,
-		},
-	});
-
-    //User Data in Redis
-    const userRegistrationKey = `user-registration-data:${email}`;
-	const redisUserDataPayload = {
-		name,
-		email,
-        timezone,
-		password: hashedPassword,
-	};
-
-	await redisClient.set(
-		userRegistrationKey,
-		JSON.stringify(redisUserDataPayload),
-		{
-			expiration: {
-				type: "EX",
-				value: expirationSeconds,
-			},
-		},
-	);
-
-    //sending Email
-    const tempatePath = path.join(
+  const tempatePath = path.join(
 		process.cwd(),
-		"src/app/templates/verify-email.ejs",
+		"src/app/templates/welcome-email.ejs",
 	);
 
 	const templateData = {
-		name,
-		email,
-		otp: otpValue,
+		name: createdUser.name,
 	};
 
 	const html = await ejs.renderFile(tempatePath, templateData);
@@ -76,13 +166,38 @@ const registerUserIntoDB = async (payload : IRegisterUser) => {
 	await transporter.sendMail({
 		from: config.email_sender,
 		to: email,
-		subject: "Adviso - Email Verification",
+		subject: "Welcome To ADVISO",
 		html,
 	});
 
+	const jwtPayload = {
+		userId: createdUser.userId,
+		name: createdUser.name,
+		email: createdUser.email,
+		role: createdUser.role,
+	};
+
+	const accessToken = jwtUtils.createToken(
+		jwtPayload,
+		config.jwt_access_secret,
+		config.jwt_access_expires_in as SignOptions,
+	);
+
+	const refreshToken = jwtUtils.createToken(
+		jwtPayload,
+		config.jwt_refresh_secret,
+		config.jwt_refresh_expires_in as SignOptions,
+	);
+
+	return {
+        createdUser,
+		accessToken,
+		refreshToken,
+	};
 
 };
 
 export const AuthServices = {
-    registerUserIntoDB
+  registerUserIntoDB,
+  verifyUserEmail
 };
