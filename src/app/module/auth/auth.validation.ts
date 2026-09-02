@@ -47,8 +47,15 @@ const LoginZodSchema = z.object({
 	password: passwordValidation,
 });
 
+const ResetPasswordZodSchema = z.object({
+	email: z.email("Not email!!"),
+	password: passwordValidation,
+	otp: z.string().length(6),
+});
+
 export const AuthValidation = {
 	registerZodSchema,
 	EmailVerifyZodSchema,
 	LoginZodSchema,
+	ResetPasswordZodSchema,
 };

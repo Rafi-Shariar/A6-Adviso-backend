@@ -14,3 +14,9 @@ export interface ILoginUserPayload {
 	email: string;
 	password: string;
 }
+
+export interface IResetPasswordPayload {
+	email: string;
+	password: string;
+	otp: string;
+}

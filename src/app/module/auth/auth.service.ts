@@ -4,6 +4,7 @@ import { AppError } from "../../utils/AppError";
 import {
 	ILoginUserPayload,
 	IRegisterUser,
+	IResetPasswordPayload,
 	IVerifyEmailPayload,
 } from "./auth.interface";
 import httpStatus from "http-status";
@@ -335,10 +336,46 @@ const forgotPassword = async (email: string) => {
 		html,
 	});
 };
+
+const resetPassword = async (payload: IResetPasswordPayload) => {
+	const { email, otp, password } = payload;
+
+	const user = await getActiveUserByEmailOrThrow(email);
+
+	if (user.googleId && user.authProvider === "GOOGLE") {
+		throw new AppError(httpStatus.BAD_REQUEST, "User Has Account With Google");
+	}
+
+	const key = `forgor-password-otp:${user.email}`;
+
+	const redisOtp = await redisClient.get(key);
+
+	if (!redisOtp) {
+		throw new AppError(httpStatus.BAD_REQUEST, "Invalid OTP");
+	}
+
+	if (redisOtp !== otp) {
+		throw new AppError(httpStatus.BAD_REQUEST, "OTP Does Not Match");
+	}
+
+	const hashedNewPassword = await bcrypt.hash(password, 10);
+
+	await prisma.user.update({
+		where: {
+			email: user.email,
+		},
+		data: {
+			password: hashedNewPassword,
+		},
+	});
+
+	await redisClient.del([key]);
+};
 export const AuthServices = {
 	registerUserIntoDB,
 	verifyUserEmail,
 	loginUser,
 	refreshToken,
 	forgotPassword,
+	resetPassword,
 };
