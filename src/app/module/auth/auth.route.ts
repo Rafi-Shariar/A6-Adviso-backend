@@ -15,4 +15,6 @@ router.post('/verify-email', validateRequest(AuthValidation.EmailVerifyZodSchema
 
 router.post('/login', validateRequest(AuthValidation.LoginZodSchema), AuthController.loginUser)
 
+router.post('/refresh-token', AuthController.refreshToken)
+
 export const AuthRoutes = router;

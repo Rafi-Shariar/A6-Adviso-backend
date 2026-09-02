@@ -12,7 +12,7 @@ import config from "../../config";
 import { AccountStatus, Role } from "../../../generated/prisma/enums";
 import { ILoginUserPayloadExample } from "../example/example.interface";
 import { jwtUtils } from "../../utils/jwt";
-import { SignOptions } from "jsonwebtoken";
+import { JwtPayload, SignOptions } from "jsonwebtoken";
 import { getActiveUserByEmailOrThrow } from "../../../helper/isValidUser";
 
 const registerUserIntoDB = async (payload: IRegisterUser) => {
@@ -247,8 +247,54 @@ const loginUser = async (payload: ILoginUserPayload) => {
 	};
 };
 
+const refreshToken = async (token: string) => {
+	const verifiedRefreshToken = jwtUtils.verifyToken(
+		token,
+		config.jwt_refresh_secret,
+	);
+
+	if (!verifiedRefreshToken.success || !verifiedRefreshToken.data) {
+		throw new AppError(
+			httpStatus.UNAUTHORIZED,
+			config.node_env === "development"
+				? verifiedRefreshToken.error
+				: "Invalid refresh token",
+		);
+	}
+
+	const data = verifiedRefreshToken.data as JwtPayload;
+
+	const user = await getActiveUserByEmailOrThrow(data.email)
+
+	const jwtPayload = {
+		userId: user.userId,
+		name: user.name,
+		email: user.email,
+		role: user.role,
+	};
+
+	const accessToken = jwtUtils.createToken(
+		jwtPayload,
+		config.jwt_access_secret,
+		config.jwt_access_expires_in as SignOptions,
+	);
+
+	const refreshToken = jwtUtils.createToken(
+		jwtPayload,
+		config.jwt_refresh_secret,
+		config.jwt_refresh_expires_in as SignOptions,
+	);
+
+	return {
+		accessToken,
+		refreshToken,
+	};
+};
+
+
 export const AuthServices = {
   registerUserIntoDB,
   verifyUserEmail,
-  loginUser
+  loginUser,
+  refreshToken
 };
