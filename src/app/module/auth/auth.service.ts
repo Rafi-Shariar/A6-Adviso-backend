@@ -4,6 +4,7 @@ import { AppError } from "../../utils/AppError";
 import {
 	ILoginUserPayload,
 	IRegisterUser,
+	IRequestUser,
 	IResetPasswordPayload,
 	IVerifyEmailPayload,
 } from "./auth.interface";
@@ -371,6 +372,23 @@ const resetPassword = async (payload: IResetPasswordPayload) => {
 
 	await redisClient.del([key]);
 };
+
+const getMe = async (user: IRequestUser) => {
+	const isUserExists = await prisma.user.findUnique({
+		where: {
+			userId: user.userId,
+		},
+		omit: {
+			password: true,
+		},
+	});
+
+	if (!isUserExists) {
+		throw new AppError(httpStatus.NOT_FOUND, "User not found");
+	}
+
+	return isUserExists;
+};
 export const AuthServices = {
 	registerUserIntoDB,
 	verifyUserEmail,
@@ -378,4 +396,5 @@ export const AuthServices = {
 	refreshToken,
 	forgotPassword,
 	resetPassword,
+  getMe
 };
