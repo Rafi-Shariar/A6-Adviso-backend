@@ -9,11 +9,15 @@ model Mentor {
     linkedinURL String
     professionalDomain String
     portfolioURL String?
+    resume String
+    resumePublicId String?
     sessionCharge Decimal @db.Decimal(10,2)
     documents Json
 
     verificationStatus VerificationStatus @default(PENDING)
     rejectionReason String?
+    reviewedBy String?
+    reviewedAt DateTime?
 
     totalSessionsCompleted Int @default(0)
     averageRatings Decimal @default(0.0) @db.Decimal(3,2) 
