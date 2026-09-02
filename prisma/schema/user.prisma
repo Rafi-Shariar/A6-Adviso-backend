@@ -6,7 +6,7 @@ model User {
   timezone        String  @default("UTC")
   password        String?
   isEmailVerified Boolean @default(false)
-  profileURL      String
+  profileURL      String?
   imagePublicId   String?
 
   googleId     String?
