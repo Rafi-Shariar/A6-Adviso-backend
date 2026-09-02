@@ -1,4 +1,4 @@
-import z from "zod";
+import z, { email } from "zod";
 
 const passwordValidation = z
 	.string({ message: "Password is required" })
@@ -42,7 +42,13 @@ const EmailVerifyZodSchema = z.object({
 	otp: z.string().length(6),
 });
 
+const LoginZodSchema = z.object({
+	email: z.email("Not email!!"),
+	password : passwordValidation
+})
+
 export const AuthValidation = {
 	registerZodSchema,
-	EmailVerifyZodSchema
+	EmailVerifyZodSchema,
+	LoginZodSchema
 };

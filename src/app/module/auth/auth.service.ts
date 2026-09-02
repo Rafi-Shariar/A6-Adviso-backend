@@ -1,7 +1,7 @@
 import bcrypt from "bcryptjs";
 import { prisma } from "../../lib/prisma";
 import { AppError } from "../../utils/AppError";
-import { IRegisterUser, IVerifyEmailPayload } from "./auth.interface";
+import { ILoginUserPayload, IRegisterUser, IVerifyEmailPayload } from "./auth.interface";
 import httpStatus from "http-status";
 import crypto from "crypto";
 import { redisClient } from "../../lib/redis";
@@ -13,6 +13,7 @@ import { AccountStatus, Role } from "../../../generated/prisma/enums";
 import { ILoginUserPayloadExample } from "../example/example.interface";
 import { jwtUtils } from "../../utils/jwt";
 import { SignOptions } from "jsonwebtoken";
+import { getActiveUserByEmailOrThrow } from "../../../helper/isValidUser";
 
 const registerUserIntoDB = async (payload: IRegisterUser) => {
   const { name, timezone, password } = payload;
@@ -190,14 +191,64 @@ const verifyUserEmail = async (payload: IVerifyEmailPayload) => {
 	);
 
 	return {
-        createdUser,
+        data : createdUser,
 		accessToken,
 		refreshToken,
 	};
 
 };
 
+const loginUser = async (payload: ILoginUserPayload) => {
+
+
+	const { password } = payload;
+	const email = payload.email.trim().toLowerCase();
+
+	const user = await getActiveUserByEmailOrThrow(email)
+
+	if (user.password === null && user.googleId !== null) {
+		throw new AppError(
+			httpStatus.BAD_REQUEST,
+			"User Already Has Account Registered With Google. Try To Login With Google.",
+		);
+	}
+
+	const isPasswordMatched = await bcrypt.compare(
+		password,
+		user.password as string,
+	);
+
+	if (!isPasswordMatched) {
+		throw new AppError(httpStatus.UNAUTHORIZED, "Invalid credentials");
+	}
+
+	const jwtPayload = {
+		userId: user.userId,
+		name: user.name,
+		email: user.email,
+		role: user.role,
+	};
+
+	const accessToken = jwtUtils.createToken(
+		jwtPayload,
+		config.jwt_access_secret,
+		config.jwt_access_expires_in as SignOptions,
+	);
+
+	const refreshToken = jwtUtils.createToken(
+		jwtPayload,
+		config.jwt_refresh_secret,
+		config.jwt_refresh_expires_in as SignOptions,
+	);
+
+	return {
+		accessToken,
+		refreshToken,
+	};
+};
+
 export const AuthServices = {
   registerUserIntoDB,
-  verifyUserEmail
+  verifyUserEmail,
+  loginUser
 };
