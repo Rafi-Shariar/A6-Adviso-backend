@@ -1,0 +1,18 @@
+model Blog{
+    blogId String @id @default(ulid())
+
+    mentorId String
+    mentor Mentor @relation(fields: [mentorId], references: [mentorId], onDelete: Cascade, onUpdate: Cascade)
+
+    bannerImage String
+    bannerImagePublicId String
+
+    title String @unique
+    content String
+
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+
+    @@map("blogs")
+
+}

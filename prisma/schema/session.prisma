@@ -1,0 +1,38 @@
+model Session {
+    sessionId String @id @default(uuid())
+    
+    userId String
+    user User @relation(fields: [userId], references: [userId], onDelete: Cascade, onUpdate: Cascade)
+
+    mentorId String
+    mentor Mentor @relation(fields: [mentorId], references: [mentorId], onDelete: Cascade, onUpdate: Cascade)
+
+    scheduleId String
+    schedule Schedule @relation(fields: [scheduleId], references: [scheduleId], onDelete: Cascade, onUpdate: Cascade)
+
+    sessionFees Decimal @db.Decimal(10,2)
+
+    startUTC DateTime @db.Time(6)
+    endUTC DateTime @db.Time(6)
+
+    status SessionStatus @default(PENDING)
+    purpose String
+
+    documents Json?
+    meetingLink String
+
+    cancellationReason String?
+    cancelledAt DateTime?
+
+
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+
+    payment Payment?
+    review Review?
+
+
+    @@map("sessions")
+
+
+}

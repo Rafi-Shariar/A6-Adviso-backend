@@ -11,8 +11,4 @@ const LoginZodSchema = z.object({
 		.regex(/[^A-Za-z0-9]/, "Password must contain atleast 1 Special Character"),
 });
 
-
-
-export const ExampleValidation = {
-
-};
+export const ExampleValidation = {};

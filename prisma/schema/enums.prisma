@@ -1,23 +1,39 @@
 enum Role {
   SUPER_ADMIN
   ADMIN
-  DOCTOR
-  PATIENT
-}
-
-enum UserStatus {
-  ACTIVE
-  BLOCKED
-  DELETED
-}
-
-enum Gender {
-  MALE
-  FEMALE
-  OTHER
+  MENTOR
+  USER
 }
 
 enum AuthProvider {
+  CREDENTIALS
   GOOGLE
-  CREDENTIAL
+}
+
+enum AccountStatus {
+  ACTIVE
+  BLOCKED
+  SUSPENDED
+}
+
+
+
+enum VerificationStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+enum SessionStatus {
+  PENDING
+  COMFIRMED
+  CANCELLED
+}
+
+
+enum PaymentStatus {
+    PENDING
+    PAID
+    FAILED
+    REFUNDED
 }

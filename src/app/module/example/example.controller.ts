@@ -4,11 +4,7 @@ import { AppError } from "../../utils/AppError";
 import { catchAsync } from "../../utils/catchAsync";
 import { sendResponse } from "../../utils/sendResponse";
 
-
-
 const example = catchAsync(async (req: Request, res: Response) => {
-	
-
 	sendResponse(res, {
 		statusCode: httpStatus.OK,
 		success: true,
@@ -17,8 +13,4 @@ const example = catchAsync(async (req: Request, res: Response) => {
 	});
 });
 
-
-
-export const ExampleController = {
-	
-};
+export const ExampleController = {};

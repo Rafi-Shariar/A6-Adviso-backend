@@ -1,7 +1,3 @@
-const exampleService = async() => {
+const exampleService = async () => {};
 
-}
-
-export const exampleServices = {
-
-}
+export const exampleServices = {};

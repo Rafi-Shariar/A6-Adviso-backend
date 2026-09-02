@@ -1,21 +1,26 @@
 model User {
-  id                 String     @id @default(uuid())
-  name               String
-  email              String
-  password           String?
-  googleId           String?     @unique
-  authProvider       AuthProvider @default(CREDENTIAL)
-  emailVerified      Boolean    @default(false)
-  role               Role       @default(PATIENT)
-  status             UserStatus @default(ACTIVE)
-  needPasswordChange Boolean    @default(false)
-  imageUrl           String     @default("")
-  imagePublicId      String     @default("")
-  isDeleted          Boolean    @default(false)
-  deletedAt          DateTime?
-  createdAt          DateTime   @default(now())
-  updatedAt          DateTime   @updatedAt
+  userId          String  @id @default(uuid())
+  role            Role    @default(USER)
+  name            String
+  email           String  @unique
+  timezone        String  @default("UTC")
+  password        String?
+  isEmailVerified Boolean @default(false)
+  profileURL      String
+  imagePublicId   String?
 
-  @@unique([email])
+  googleId     String?
+  authProvider AuthProvider @default(CREDENTIALS)
+
+  accountStatus AccountStatus @default(ACTIVE)
+  isDeleted     Boolean       @default(false)
+  deletedAt     DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  mentor Mentor?
+  sessions Session[]
+
   @@map("users")
 }

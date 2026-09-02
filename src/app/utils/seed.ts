@@ -39,8 +39,6 @@
 
 //         console.log("Super Admin Created : ", superAdmin);
 
-
-
 //     } catch (error) {
 
 //         console.log("Error Seeding Super Admin : ", error);
@@ -51,6 +49,5 @@
 //             }
 //         })
 
-        
 //     }
 // }

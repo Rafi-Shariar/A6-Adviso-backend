@@ -1,0 +1,34 @@
+model Mentor {
+    mentorId  String @id  
+    user User @relation(fields: [mentorId], references: [userId], onDelete: Cascade, onUpdate: Cascade)
+
+    headline String
+    bio String
+    yearOfExperience Int
+    expertiseTags String[] @default([])
+    linkedinURL String
+    professionalDomain String
+    portfolioURL String?
+    sessionCharge Decimal @db.Decimal(10,2)
+    documents Json
+
+    verificationStatus VerificationStatus @default(PENDING)
+    rejectionReason String?
+
+    totalSessionsCompleted Int @default(0)
+    averageRatings Decimal @default(0.0) @db.Decimal(3,2) 
+    totalReviews Int @default(0)
+
+    isDeleted Boolean @default(false)
+    deletedAt DateTime?
+
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+
+    schedules Schedule[]
+    sessions Session[]
+    blogs Blog[]
+
+    @@map("mentors")
+
+}
