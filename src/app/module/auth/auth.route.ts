@@ -11,10 +11,20 @@ router.post(
 	AuthController.registerUser,
 );
 
-router.post('/verify-email', validateRequest(AuthValidation.EmailVerifyZodSchema), AuthController.verifyEmail)
+router.post(
+	"/verify-email",
+	validateRequest(AuthValidation.EmailVerifyZodSchema),
+	AuthController.verifyEmail,
+);
 
-router.post('/login', validateRequest(AuthValidation.LoginZodSchema), AuthController.loginUser)
+router.post(
+	"/login",
+	validateRequest(AuthValidation.LoginZodSchema),
+	AuthController.loginUser,
+);
 
-router.post('/refresh-token', AuthController.refreshToken)
+router.post("/refresh-token", AuthController.refreshToken);
+
+router.post("/forgot-password", AuthController.forgotPassword);
 
 export const AuthRoutes = router;

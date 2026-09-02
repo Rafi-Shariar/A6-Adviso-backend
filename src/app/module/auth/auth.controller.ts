@@ -18,10 +18,9 @@ const registerUser = catchAsync(async (req: Request, res: Response) => {
 });
 
 const verifyEmail = catchAsync(async (req: Request, res: Response) => {
-	
-	const result = await AuthServices.verifyUserEmail(req.body)
+	const result = await AuthServices.verifyUserEmail(req.body);
 
-	const { accessToken, refreshToken} = result;
+	const { accessToken, refreshToken } = result;
 
 	res.cookie("accessToken", accessToken, {
 		httpOnly: true,
@@ -36,7 +35,6 @@ const verifyEmail = catchAsync(async (req: Request, res: Response) => {
 		maxAge: 1000 * 60 * 60 * 24 * 7, // 7 days
 	});
 
-
 	sendResponse(res, {
 		statusCode: httpStatus.OK,
 		success: true,
@@ -44,7 +42,6 @@ const verifyEmail = catchAsync(async (req: Request, res: Response) => {
 		data: result,
 	});
 });
-
 
 const loginUser = catchAsync(async (req: Request, res: Response) => {
 	const payload = req.body;
@@ -74,7 +71,6 @@ const loginUser = catchAsync(async (req: Request, res: Response) => {
 		},
 	});
 });
-
 
 const refreshToken = catchAsync(async (req: Request, res: Response) => {
 	if (!req.cookies.refreshToken) {
@@ -107,9 +103,23 @@ const refreshToken = catchAsync(async (req: Request, res: Response) => {
 	});
 });
 
+const forgotPassword = catchAsync(async (req: Request, res: Response) => {
+	const { email } = req.body;
+
+	await AuthServices.forgotPassword(email);
+
+	sendResponse(res, {
+		statusCode: httpStatus.OK,
+		success: true,
+		message: `OTP Sent To Email.`,
+		data: null,
+	});
+});
+
 export const AuthController = {
 	registerUser,
 	verifyEmail,
 	loginUser,
-	refreshToken
+	refreshToken,
+	forgotPassword,
 };

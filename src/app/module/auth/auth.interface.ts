@@ -6,11 +6,11 @@ export interface IRegisterUser {
 }
 
 export interface IVerifyEmailPayload {
-	otp : string;
-	email : string;
+	otp: string;
+	email: string;
 }
 
-export interface ILoginUserPayload{
-	email : string;
-	password : string;
+export interface ILoginUserPayload {
+	email: string;
+	password: string;
 }

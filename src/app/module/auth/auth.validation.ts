@@ -44,11 +44,11 @@ const EmailVerifyZodSchema = z.object({
 
 const LoginZodSchema = z.object({
 	email: z.email("Not email!!"),
-	password : passwordValidation
-})
+	password: passwordValidation,
+});
 
 export const AuthValidation = {
 	registerZodSchema,
 	EmailVerifyZodSchema,
-	LoginZodSchema
+	LoginZodSchema,
 };
