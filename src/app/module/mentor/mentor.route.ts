@@ -9,7 +9,7 @@ import { Role } from "../../../generated/prisma/enums";
 const router = Router();
 
 router.post(
-	"/apply",
+	"/applications/apply",
 	upload.fields([
 		{ name: "resume", maxCount: 1 },
 		{ name: "documents", maxCount: 5 },
@@ -17,5 +17,7 @@ router.post(
 	auth(Role.USER),
 	MentorController.ApplyAsMentor,
 );
+
+router.post('/applications/approve', auth(Role.SUPER_ADMIN, Role.ADMIN), MentorController.approveMentorApplications)
 
 export const MentorRoutes = router;

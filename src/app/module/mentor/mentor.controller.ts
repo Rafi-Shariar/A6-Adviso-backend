@@ -41,6 +41,24 @@ const ApplyAsMentor = catchAsync(async (req: Request, res: Response) => {
 	});
 });
 
+
+const approveMentorApplications = catchAsync(async (req: Request, res: Response) => {
+
+	const paylaod = req.body;
+	const user = req.user!;
+
+	const result = await mentorServices.approveMentorApplications(paylaod, user)
+	
+	sendResponse(res, {
+		statusCode: httpStatus.OK,
+		success: true,
+		message: "Mentor pplication verified",
+		data: result,
+	});
+});
+
+
 export const MentorController = {
 	ApplyAsMentor,
+	approveMentorApplications
 };
