@@ -1,68 +1,46 @@
-import { SessionStatus } from "../../../generated/prisma/enums";
 import { prisma } from "../../lib/prisma";
-import { ITimeSlot } from "./session.interface";
 
-const getMentorAvailableSlots = async (mentorId: string) => {
-	const SLOT_DURATION_MS = 20 * 60 * 1000;
 
-	const today = new Date();
-	today.setHours(0, 0, 0, 0);
+export const getMentorAvailableSlots = async (mentorId: string) => {
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
 
-	const schedules = await prisma.schedule.findMany({
-		where: {
-			mentorId,
-			isDeleted: false,
-			date: { gte: today },
-		},
+  const availableSlots = await prisma.slot.findMany({
+    where: {
+      isBooked: false,
+      schedule: {
+        mentorId,
+        isDeleted: false,
+        date: { gte: today },
+      },
+    },
+    orderBy: [{ schedule: { date: "asc" } }, { startTime: "asc" }],
+    select: {
+      slotId: true,
+      startTime: true,
+      endTime: true,
+      schedule: {
+        select: {
+          scheduleId: true,
+          date: true,
+        },
+      },
+    },
+  });
 
-		include: {
-			sessions: {
-				where: {
-					status: {
-						notIn: [SessionStatus.CANCELLED],
-					},
-				},
-				select: {
-					startUTC: true,
-					endUTC: true,
-				},
-			},
-		},
-		orderBy: [{ date: "asc" }, { startTime: "asc" }],
-	});
+  // রেসপন্স অবজেক্ট ফ্ল্যাট (Flat) করে রিটার্ন
 
-	const availableSlots: ITimeSlot[] = [];
+  const result = availableSlots.map((item) => ({
+    slotId: item.slotId,
+    scheduleId: item.schedule.scheduleId,
+    date: item.schedule.date.toISOString().split("T")[0],
+    startTime: item.startTime.toISOString(),
+    endTime: item.endTime.toISOString(),
+  }));
 
-	for (const schedule of schedules) {
-		let currentSlotStart = new Date(schedule.startTime).getTime();
-		const scheduleEnd = new Date(schedule.endTime).getTime();
-
-		while (currentSlotStart + SLOT_DURATION_MS <= scheduleEnd) {
-			const currentSlotEnd = currentSlotStart + SLOT_DURATION_MS;
-
-			const isBooked = schedule.sessions.some((session) => {
-				const sessionStart = new Date(session.startUTC).getTime();
-				const sessionEnd = new Date(session.endUTC).getTime();
-
-				return currentSlotStart < sessionEnd && currentSlotEnd > sessionStart;
-			});
-
-			if (!isBooked) {
-				availableSlots.push({
-					scheduleId: schedule.scheduleId,
-					date: schedule.date.toISOString().split("T")[0],
-					startTime: new Date(currentSlotStart).toISOString(),
-					endTime: new Date(currentSlotEnd).toISOString(),
-				});
-			}
-
-			currentSlotStart = currentSlotEnd;
-		}
-	}
-
-	return availableSlots;
+  return result;
 };
 
 export const SessionServices = {
-	getMentorAvailableSlots,
+  getMentorAvailableSlots,
 };
