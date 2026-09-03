@@ -13,6 +13,7 @@ import { globalErrorHandler } from "./app/middleware/globalErrorHandler";
 import { notFound } from "./app/middleware/notFound";
 import { AuthRoutes } from "./app/module/auth/auth.route";
 import { MentorRoutes } from "./app/module/mentor/mentor.route";
+import { ScheduleRoutes } from "./app/module/schedule/schedule.route";
 
 const app: Application = express();
 
@@ -33,6 +34,7 @@ app.use(cookieParser());
 //routes
 app.use("/api/v1/auth", AuthRoutes);
 app.use("/api/v1/mentor", MentorRoutes);
+app.use("/api/v1/schedule", ScheduleRoutes);
 
 // Basic route
 app.get("/", async (req: Request, res: Response) => {

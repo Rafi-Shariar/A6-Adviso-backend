@@ -87,10 +87,9 @@ const getAllMentorsPublicList = catchAsync(
 
 const getSingleMentorPublicProfile = catchAsync(
 	async (req: Request, res: Response) => {
+		const mentorId = req.params.mentorId as string;
 
-		const mentorId = req.params.mentorId as string
-		
-		const result = await mentorServices.getSingleMentorPublicProfile(mentorId)
+		const result = await mentorServices.getSingleMentorPublicProfile(mentorId);
 		sendResponse(res, {
 			statusCode: httpStatus.OK,
 			success: true,
@@ -102,7 +101,6 @@ const getSingleMentorPublicProfile = catchAsync(
 
 const getAllMentorsAdminList = catchAsync(
 	async (req: Request, res: Response) => {
-
 		const result = await mentorServices.getAllMentorsAdminList(req.query);
 
 		sendResponse(res, {
@@ -117,10 +115,9 @@ const getAllMentorsAdminList = catchAsync(
 
 const getSingleMentorAdminProfile = catchAsync(
 	async (req: Request, res: Response) => {
+		const mentorId = req.params.mentorId as string;
 
-		const mentorId = req.params.mentorId as string
-		
-		const result = await mentorServices.getSingleMentorAdminProfile(mentorId)
+		const result = await mentorServices.getSingleMentorAdminProfile(mentorId);
 		sendResponse(res, {
 			statusCode: httpStatus.OK,
 			success: true,
@@ -132,11 +129,10 @@ const getSingleMentorAdminProfile = catchAsync(
 
 const changeMentorshipStatus = catchAsync(
 	async (req: Request, res: Response) => {
+		const mentorId = req.params.mentorId as string;
+		const { status } = req.body;
 
-		const mentorId = req.params.mentorId as string
-		const {status} = req.body;
-		
-		await mentorServices.changeMentorshipStatus(mentorId,status)
+		await mentorServices.changeMentorshipStatus(mentorId, status);
 
 		sendResponse(res, {
 			statusCode: httpStatus.OK,
@@ -148,20 +144,17 @@ const changeMentorshipStatus = catchAsync(
 );
 
 const updateMentorProfile = catchAsync(async (req: Request, res: Response) => {
+	const mentorId = req.user?.userId as string;
 
-  const mentorId = req.user?.userId as string;
+	const result = await mentorServices.updateMentorProfile(mentorId, req.body);
 
-  const result = await mentorServices.updateMentorProfile(mentorId, req.body);
-
-  sendResponse(res, {
-    statusCode: httpStatus.OK,
-    success: true,
-    message: "Mentor profile updated successfully",
-    data: result,
-  });
+	sendResponse(res, {
+		statusCode: httpStatus.OK,
+		success: true,
+		message: "Mentor profile updated successfully",
+		data: result,
+	});
 });
-
-
 
 export const MentorController = {
 	ApplyAsMentor,
@@ -172,5 +165,5 @@ export const MentorController = {
 	getAllMentorsAdminList,
 	getSingleMentorAdminProfile,
 	changeMentorshipStatus,
-	updateMentorProfile
+	updateMentorProfile,
 };
