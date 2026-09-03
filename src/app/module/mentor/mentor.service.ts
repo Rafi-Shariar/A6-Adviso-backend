@@ -306,27 +306,35 @@ const getAllMentorsPublicList = async (query: Record<string, any>) => {
 	});
 
 	const [result, total] = await Promise.all([
-		prisma.mentor.findMany({
-			where: whereConditions,
-			skip,
-			take: limit,
-			orderBy: {
-				[sortBy]: sortOrder,
-			},
-			include: {
-				user: {
-					select: {
-						name: true,
-						profileURL: true,
-					},
-				},
-			},
-		}),
+  prisma.mentor.findMany({
+    where: whereConditions,
+    skip,
+    take: limit,
+    orderBy: {
+      [sortBy]: sortOrder,
+    },
+    select: {
+      mentorId: true,
+      headline: true,
+      bio: true,
+      yearOfExperience: true,
+      professionalDomain: true,
+	  expertiseTags : true,
+      sessionCharge: true,
+      averageRatings: true,
+      user: {
+        select: {
+          name: true,
+          profileURL: true,
+        },
+      },
+    },
+  }),
 
-		prisma.mentor.count({
-			where: whereConditions,
-		}),
-	]);
+  prisma.mentor.count({
+    where: whereConditions,
+  }),
+]);
 
 	return {
 		meta: {
