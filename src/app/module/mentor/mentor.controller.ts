@@ -100,10 +100,42 @@ const getSingleMentorPublicProfile = catchAsync(
 	},
 );
 
+const getAllMentorsAdminList = catchAsync(
+	async (req: Request, res: Response) => {
+
+		const result = await mentorServices.getAllMentorsAdminList(req.query);
+
+		sendResponse(res, {
+			statusCode: httpStatus.OK,
+			success: true,
+			message: "All mentors retrieved successfully.",
+			meta: result.meta,
+			data: result.data,
+		});
+	},
+);
+
+const getSingleMentorAdminProfile = catchAsync(
+	async (req: Request, res: Response) => {
+
+		const mentorId = req.params.mentorId as string
+		
+		const result = await mentorServices.getSingleMentorAdminProfile(mentorId)
+		sendResponse(res, {
+			statusCode: httpStatus.OK,
+			success: true,
+			message: "Mentor Profile Retrieved Successfully",
+			data: result,
+		});
+	},
+);
+
 export const MentorController = {
 	ApplyAsMentor,
 	approveMentorApplications,
 	getFeaturedMentors,
 	getAllMentorsPublicList,
-	getSingleMentorPublicProfile
+	getSingleMentorPublicProfile,
+	getAllMentorsAdminList,
+	getSingleMentorAdminProfile
 };

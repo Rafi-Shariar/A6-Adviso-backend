@@ -37,3 +37,8 @@ enum PaymentStatus {
     FAILED
     REFUNDED
 }
+
+enum MentorshipStatus {
+  OPEN
+  BLOCKED
+}

@@ -27,4 +27,8 @@ router.get("/featured", MentorController.getFeaturedMentors);
 router.get("/", MentorController.getAllMentorsPublicList);
 router.get("/:mentorId", MentorController.getSingleMentorPublicProfile);
 
+//admin routes
+router.get("/admin/all-mentors", auth(Role.ADMIN, Role.SUPER_ADMIN), MentorController.getAllMentorsAdminList);
+router.get("/admin/all-mentors/:mentorId", auth(Role.ADMIN, Role.SUPER_ADMIN), MentorController.getSingleMentorAdminProfile);
+
 export const MentorRoutes = router;
