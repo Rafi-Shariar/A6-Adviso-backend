@@ -41,27 +41,28 @@ const ApplyAsMentor = catchAsync(async (req: Request, res: Response) => {
 	});
 });
 
+const approveMentorApplications = catchAsync(
+	async (req: Request, res: Response) => {
+		const paylaod = req.body;
+		const user = req.user!;
 
-const approveMentorApplications = catchAsync(async (req: Request, res: Response) => {
+		const result = await mentorServices.approveMentorApplications(
+			paylaod,
+			user,
+		);
 
-	const paylaod = req.body;
-	const user = req.user!;
-
-	const result = await mentorServices.approveMentorApplications(paylaod, user)
-	
-	sendResponse(res, {
-		statusCode: httpStatus.OK,
-		success: true,
-		message: "Mentor pplication verified",
-		data: result,
-	});
-});
+		sendResponse(res, {
+			statusCode: httpStatus.OK,
+			success: true,
+			message: "Mentor pplication verified",
+			data: result,
+		});
+	},
+);
 
 const getFeaturedMentors = catchAsync(async (req: Request, res: Response) => {
+	const result = await mentorServices.getFeaturedMentors();
 
-
-	const result = await mentorServices.getFeaturedMentors()
-	
 	sendResponse(res, {
 		statusCode: httpStatus.OK,
 		success: true,
@@ -70,9 +71,23 @@ const getFeaturedMentors = catchAsync(async (req: Request, res: Response) => {
 	});
 });
 
+const getAllMentorsPublicList = catchAsync(
+	async (req: Request, res: Response) => {
+		const result = await mentorServices.getAllMentorsPublicList(req.query);
+
+		sendResponse(res, {
+			statusCode: httpStatus.OK,
+			success: true,
+			message: "All mentors retrieved successfully.",
+			meta: result.meta,
+			data: result.data,
+		});
+	},
+);
 
 export const MentorController = {
 	ApplyAsMentor,
 	approveMentorApplications,
-	getFeaturedMentors
+	getFeaturedMentors,
+	getAllMentorsPublicList,
 };

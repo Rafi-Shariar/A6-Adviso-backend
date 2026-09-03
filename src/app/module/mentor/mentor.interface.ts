@@ -11,9 +11,8 @@ export interface IApplyAsMentorPayload {
 	sessionCharge: number;
 }
 
-
 export interface IApproveMentorPayload {
-	mentorId : string;
-	verificationStatus : VerificationStatus;
-	rejectionReason? : string;
+	mentorId: string;
+	verificationStatus: VerificationStatus;
+	rejectionReason?: string;
 }

@@ -18,8 +18,12 @@ router.post(
 	MentorController.ApplyAsMentor,
 );
 
-router.post('/applications/approve', auth(Role.SUPER_ADMIN, Role.ADMIN), MentorController.approveMentorApplications)
-router.get('/featured', MentorController.getFeaturedMentors)
-
+router.post(
+	"/applications/approve",
+	auth(Role.SUPER_ADMIN, Role.ADMIN),
+	MentorController.approveMentorApplications,
+);
+router.get("/featured", MentorController.getFeaturedMentors);
+router.get("/", MentorController.getAllMentorsPublicList);
 
 export const MentorRoutes = router;
