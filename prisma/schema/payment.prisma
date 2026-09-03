@@ -1,24 +1,31 @@
 model Payment {
-    paymentId String @id @default(uuid())
+    paymentId     String @id @default(uuid())
     transactionId String @unique
 
-    sessionId String @unique
-    session Session @relation(fields: [sessionId], references: [sessionId], onDelete: Cascade, onUpdate: Cascade)
+    sessionId String  @unique
+    session   Session @relation(fields: [sessionId], references: [sessionId], onDelete: Cascade, onUpdate: Cascade)
 
-    amount Decimal @db.Decimal(10,2)
-    method String @default("CARD")
+    amount Decimal @db.Decimal(10, 2)
+    method String  @default("BKASH")
 
-    platformCharge Decimal @db.Decimal(10,2)
-    mentorEarnings Decimal @db.Decimal(10,2)
+    bkashPaymentId String? @unique
+    bkashTrxId     String?
+    payerReference String?
+    paidAt         String?
 
-    status PaymentStatus @default(PENDING)
-    GatewayResponse Json?
+    platformCharge Decimal? @db.Decimal(10, 2)
+    mentorEarnings Decimal? @db.Decimal(10, 2)
 
-    paidAt DateTime? 
+    status          PaymentStatus @default(PENDING)
+    gatewayResponse Json?
+
+    refundTrxId  String?
+    refundAmount Decimal? @db.Decimal(10, 2)
+    refundReason String?
+    refundedAt   String?
 
     createdAt DateTime @default(now())
     updatedAt DateTime @updatedAt
 
     @@map("payments")
-
 }

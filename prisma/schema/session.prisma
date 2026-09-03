@@ -21,7 +21,6 @@ model Session {
     status SessionStatus @default(PENDING)
     purpose String
 
-    documents Json?
     meetingLink String
 
     cancellationReason String?

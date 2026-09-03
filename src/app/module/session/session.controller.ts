@@ -22,6 +22,22 @@ const getMentorAvailableSlots = catchAsync(
 	},
 );
 
+const bookSession = catchAsync(async (req: Request, res: Response) => {
+	const { slotId, purpose } = req.body;
+	const user = req.user!;
+
+	const result = await SessionServices.bookSession(slotId, user, purpose);
+
+	sendResponse(res, {
+		statusCode: httpStatus.OK,
+		success: true,
+		message:
+			"Session Booked. Payment initiated. Please pay to confirm session.",
+		data: result,
+	});
+});
+
 export const SessionController = {
 	getMentorAvailableSlots,
+	bookSession,
 };
