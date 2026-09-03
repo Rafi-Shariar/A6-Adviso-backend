@@ -4,6 +4,9 @@ model Review {
     sessionId String @unique
     session Session @relation(fields: [sessionId], references: [sessionId], onDelete: Cascade, onUpdate: Cascade)
 
+    mentorId String
+    mentor Mentor @relation(fields: [mentorId], references: [mentorId], onDelete: Cascade, onUpdate: Cascade)
+
     ratings Decimal @db.Decimal(3,2)
     comment String
 

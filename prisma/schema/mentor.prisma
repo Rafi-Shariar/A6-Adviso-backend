@@ -32,6 +32,7 @@ model Mentor {
     schedules Schedule[]
     sessions Session[]
     blogs Blog[]
+    reviews Review[]
 
     @@map("mentors")
 

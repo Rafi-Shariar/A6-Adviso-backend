@@ -17,7 +17,8 @@ import { transporter } from "../../lib/nodemailer";
 import config from "../../config";
 import { calculatePagination } from "../../../helper/paginationHelper";
 import { buildPrismaWhereConditions } from "../../../helper/queryBuilder";
-import { date } from "zod";
+import { date, tuple } from "zod";
+import { fa } from "zod/locales";
 
 const applyAsMentor = async (
 	user: IRequestUser,
@@ -347,9 +348,80 @@ const getAllMentorsPublicList = async (query: Record<string, any>) => {
 	};
 };
 
+const getSingleMentorPublicProfile = async(mentorId : string) => {
+	const mentor = await prisma.mentor.findUnique({
+		where : {
+			mentorId,
+			isDeleted : false,
+			verificationStatus : VerificationStatus.APPROVED
+		},
+		select : {
+			user : {
+				select : {
+					name : true,
+					timezone : true,
+					profileURL : true
+				}
+			},
+			headline : true,
+			bio : true,
+			yearOfExperience : true,
+			expertiseTags : true,
+			linkedinURL : true,
+			professionalDomain : true,
+			portfolioURL : true,
+			sessionCharge : true,
+			totalSessionsCompleted : true,
+			averageRatings : true,
+			totalReviews : true,
+			blogs : {
+				where : {
+					mentorId : mentorId
+				},
+				take : 4, 
+				orderBy : { createdAt : "desc"},
+				select : {
+					bannerImage : true,
+					title : true,
+					createdAt : true
+				}
+
+			},
+			reviews : {
+				take : 6,
+				orderBy : {ratings : "desc"},
+				select : {
+					ratings : true,
+					comment : true,
+					createdAt : true,
+					session : {
+						select : {
+							user : {
+								select : {
+									name : true,
+									profileURL : true
+								}
+							}
+						}
+					}
+				} 
+
+			}
+		}
+	})
+
+	if(!mentor){
+		throw new AppError(httpStatus.NOT_FOUND, "Mentor profile not found.")
+	}
+
+	return mentor
+}
+
 export const mentorServices = {
 	applyAsMentor,
 	approveMentorApplications,
 	getFeaturedMentors,
 	getAllMentorsPublicList,
+	getSingleMentorPublicProfile
+	
 };

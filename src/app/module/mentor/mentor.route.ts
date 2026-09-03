@@ -25,5 +25,6 @@ router.post(
 );
 router.get("/featured", MentorController.getFeaturedMentors);
 router.get("/", MentorController.getAllMentorsPublicList);
+router.get("/:mentorId", MentorController.getSingleMentorPublicProfile);
 
 export const MentorRoutes = router;

@@ -85,9 +85,25 @@ const getAllMentorsPublicList = catchAsync(
 	},
 );
 
+const getSingleMentorPublicProfile = catchAsync(
+	async (req: Request, res: Response) => {
+
+		const mentorId = req.params.mentorId as string
+		
+		const result = await mentorServices.getSingleMentorPublicProfile(mentorId)
+		sendResponse(res, {
+			statusCode: httpStatus.OK,
+			success: true,
+			message: "Mentor Profile Retrieved Successfully",
+			data: result,
+		});
+	},
+);
+
 export const MentorController = {
 	ApplyAsMentor,
 	approveMentorApplications,
 	getFeaturedMentors,
 	getAllMentorsPublicList,
+	getSingleMentorPublicProfile
 };
