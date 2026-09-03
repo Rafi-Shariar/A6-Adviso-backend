@@ -10,6 +10,9 @@ model Session {
     scheduleId String
     schedule Schedule @relation(fields: [scheduleId], references: [scheduleId], onDelete: Cascade, onUpdate: Cascade)
 
+    slotId      String   @unique
+    slot        Slot     @relation(fields: [slotId], references: [slotId], onDelete: Cascade, onUpdate: Cascade)
+
     sessionFees Decimal @db.Decimal(10,2)
 
     startUTC DateTime @db.Time(6)

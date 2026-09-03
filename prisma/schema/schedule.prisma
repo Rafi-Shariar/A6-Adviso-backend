@@ -13,6 +13,7 @@ model Schedule {
     updatedAt DateTime @updatedAt
 
     sessions Session[]
+    slots Slot[]
 
     @@map("schedules")
 }

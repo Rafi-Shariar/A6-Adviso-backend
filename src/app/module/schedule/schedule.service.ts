@@ -28,15 +28,17 @@ export const createSchedule = async (
 	}
 
 	const targetDate = new Date(date);
-	const slotStartTime = new Date(startTime);
-	const slotEndTime = new Date(endTime);
+	const scheduleStartTime = new Date(startTime);
+	const scheduleEndTime = new Date(endTime);
 
-	if (slotStartTime >= slotEndTime) {
+
+	if (scheduleStartTime >= scheduleEndTime) {
 		throw new AppError(
 			httpStatus.BAD_REQUEST,
 			"Start time must be strictly before end time.",
 		);
 	}
+
 
 	const today = new Date();
 	today.setHours(0, 0, 0, 0);
@@ -48,6 +50,7 @@ export const createSchedule = async (
 		);
 	}
 
+
 	const overlappingSchedule = await prisma.schedule.findFirst({
 		where: {
 			mentorId,
@@ -56,12 +59,12 @@ export const createSchedule = async (
 			AND: [
 				{
 					startTime: {
-						lt: slotEndTime,
+						lt: scheduleEndTime,
 					},
 				},
 				{
 					endTime: {
-						gt: slotStartTime,
+						gt: scheduleStartTime,
 					},
 				},
 			],
@@ -75,12 +78,50 @@ export const createSchedule = async (
 		);
 	}
 
+	// ৫. ২০ মিনিটের স্লট ক্যালকুলেশন
+	const SLOT_DURATION_MS = 20 * 60 * 1000;
+	const slotsData: { startTime: Date; endTime: Date }[] = [];
+
+	let currentSlotStart = scheduleStartTime.getTime();
+	const scheduleEnd = scheduleEndTime.getTime();
+
+	while (currentSlotStart + SLOT_DURATION_MS <= scheduleEnd) {
+		const currentSlotEnd = currentSlotStart + SLOT_DURATION_MS;
+
+		slotsData.push({
+			startTime: new Date(currentSlotStart),
+			endTime: new Date(currentSlotEnd),
+		});
+
+		currentSlotStart = currentSlotEnd;
+	}
+
+	if (slotsData.length === 0) {
+		throw new AppError(
+			httpStatus.BAD_REQUEST,
+			"Schedule duration must be at least 20 minutes to generate slots.",
+		);
+	}
+
 	const result = await prisma.schedule.create({
 		data: {
 			mentorId,
 			date: targetDate,
-			startTime: slotStartTime,
-			endTime: slotEndTime,
+			startTime: scheduleStartTime,
+			endTime: scheduleEndTime,
+			slots: {
+				create: slotsData,
+			},
+		},
+		include: {
+			slots: {
+				select: {
+					slotId: true,
+					startTime: true,
+					endTime: true,
+					isBooked: true,
+				},
+			},
 		},
 	});
 
