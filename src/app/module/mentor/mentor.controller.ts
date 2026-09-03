@@ -57,8 +57,22 @@ const approveMentorApplications = catchAsync(async (req: Request, res: Response)
 	});
 });
 
+const getFeaturedMentors = catchAsync(async (req: Request, res: Response) => {
+
+
+	const result = await mentorServices.getFeaturedMentors()
+	
+	sendResponse(res, {
+		statusCode: httpStatus.OK,
+		success: true,
+		message: "Featured mentors retrieved successfully.",
+		data: result,
+	});
+});
+
 
 export const MentorController = {
 	ApplyAsMentor,
-	approveMentorApplications
+	approveMentorApplications,
+	getFeaturedMentors
 };

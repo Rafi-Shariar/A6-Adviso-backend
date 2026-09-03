@@ -19,5 +19,6 @@ router.post(
 );
 
 router.post('/applications/approve', auth(Role.SUPER_ADMIN, Role.ADMIN), MentorController.approveMentorApplications)
+router.get('/featured', MentorController.getFeaturedMentors)
 
 export const MentorRoutes = router;

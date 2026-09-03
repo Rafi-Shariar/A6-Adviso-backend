@@ -12,7 +12,7 @@ import { IRequestUser } from "../auth/auth.interface";
 import { VerificationStatus } from "../../../generated/prisma/enums";
 import { RequestUser } from "../../middleware/checkAuth";
 import path from "node:path";
-import ejs from "ejs";
+import ejs, { name } from "ejs";
 import { transporter } from "../../lib/nodemailer";
 import config from "../../config";
 
@@ -261,7 +261,33 @@ const approveMentorApplications = async (
   return updatedMentor;
 };
 
+const getFeaturedMentors = async() => {
+
+	const result = await prisma.mentor.findMany({
+		where : {
+			verificationStatus : "APPROVED",
+			isDeleted : false
+		},
+		orderBy : {
+			averageRatings : "desc"
+		},
+		take : 8,
+		include : {
+			user : {
+				select : {
+					name : true,
+					profileURL : true
+				}
+			}
+		}
+	})
+
+	return result
+}
+
+
 export const mentorServices = {
   applyAsMentor,
   approveMentorApplications,
+  getFeaturedMentors
 };
