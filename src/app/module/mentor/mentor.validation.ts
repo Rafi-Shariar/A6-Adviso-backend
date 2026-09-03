@@ -77,6 +77,22 @@ const applyAsMentorZodSchema = z.object({
 	),
 });
 
+export const updateMentorProfileZodSchema = z.object({
+    name: z.string().min(2).optional(),
+    timezone: z.string().optional(),
+    headline: z.string().min(5).optional(),
+    bio: z.string().min(20).optional(),
+    yearOfExperience: z.number().int().nonnegative().optional(),
+    expertiseTags: z.array(z.string()).optional(),
+    linkedinURL: z.string().url().optional(),
+    professionalDomain: z.string().optional(),
+    portfolioURL: z.string().url().optional(),
+    sessionCharge: z.number().positive().optional(),
+
+  
+});
+
 export const MentorValidation = {
 	applyAsMentorZodSchema,
+	updateMentorProfileZodSchema
 };

@@ -3,13 +3,17 @@ import { getActiveUserByEmailOrThrow } from "../../../helper/isValidUser";
 import {
   IApplyAsMentorPayload,
   IApproveMentorPayload,
+  IMentorProfileUpdatePayload,
 } from "./mentor.interface";
 import { cloudinary } from "../../lib/cloudinary";
 import httpStatus from "http-status";
 import { AppError } from "../../utils/AppError";
 import { prisma } from "../../lib/prisma";
-import { IRequestUser } from "../auth/auth.interface";
-import { MentorshipStatus, VerificationStatus } from "../../../generated/prisma/enums";
+import { IRegisterUser, IRequestUser } from "../auth/auth.interface";
+import {
+  MentorshipStatus,
+  VerificationStatus,
+} from "../../../generated/prisma/enums";
 import { RequestUser } from "../../middleware/checkAuth";
 import path from "node:path";
 import ejs, { name } from "ejs";
@@ -304,7 +308,7 @@ const getAllMentorsPublicList = async (query: Record<string, any>) => {
     baseConditions: [
       { isDeleted: false },
       { verificationStatus: VerificationStatus.APPROVED },
-	  { mentorshipStatus : MentorshipStatus.OPEN}
+      { mentorshipStatus: MentorshipStatus.OPEN },
     ],
   });
 
@@ -356,7 +360,7 @@ const getSingleMentorPublicProfile = async (mentorId: string) => {
       mentorId,
       isDeleted: false,
       verificationStatus: VerificationStatus.APPROVED,
-	  mentorshipStatus : MentorshipStatus.OPEN
+      mentorshipStatus: MentorshipStatus.OPEN,
     },
     select: {
       user: {
@@ -424,7 +428,11 @@ const getAllMentorsAdminList = async (query: Record<string, any>) => {
   const { page, limit, skip, sortBy, sortOrder } = calculatePagination(query);
 
   const searchOn = ["headline", "bio"];
-  const filterBy = ["professionalDomain", "verificationStatus"];
+  const filterBy = [
+    "professionalDomain",
+    "verificationStatus",
+    "mentorshipStatus",
+  ];
 
   const whereConditions = buildPrismaWhereConditions({
     query,
@@ -440,13 +448,13 @@ const getAllMentorsAdminList = async (query: Record<string, any>) => {
       orderBy: {
         [sortBy]: sortOrder,
       },
-	  include : {
-		user : {
-			omit : {
-				password : true
-			}
-		}
-	  }
+      include: {
+        user: {
+          omit: {
+            password: true,
+          },
+        },
+      },
     }),
 
     prisma.mentor.count({
@@ -470,15 +478,15 @@ const getSingleMentorAdminProfile = async (mentorId: string) => {
     where: {
       mentorId,
     },
-    include : {
-		user : {
-			omit : {
-				password : true
-			}
-		},
-		blogs : true,
-		reviews : true,
-	}
+    include: {
+      user: {
+        omit: {
+          password: true,
+        },
+      },
+      blogs: true,
+      reviews: true,
+    },
   });
 
   if (!mentor) {
@@ -488,6 +496,81 @@ const getSingleMentorAdminProfile = async (mentorId: string) => {
   return mentor;
 };
 
+const changeMentorshipStatus = async (
+  mentorId: string,
+  status: MentorshipStatus,
+) => {
+  const mentor = await prisma.mentor.findUnique({
+    where: {
+      mentorId,
+    },
+  });
+
+  if (!mentor) {
+    throw new AppError(httpStatus.NOT_FOUND, "Mentor profile not found!");
+  }
+
+  await prisma.mentor.update({
+    where: { mentorId },
+    data: {
+      mentorshipStatus: status,
+    },
+  });
+};
+
+const updateMentorProfile = async (
+  mentorId: string,
+  payload: IMentorProfileUpdatePayload,
+) => {
+  const isMentorExist = await prisma.mentor.findUnique({
+    where: {
+      mentorId,
+      isDeleted: false,
+    },
+  });
+
+  if (!isMentorExist) {
+    throw new AppError(httpStatus.NOT_FOUND, "Mentor profile not found!");
+  }
+
+  const { name, timezone, ...mentorData } = payload;
+
+  const result = await prisma.$transaction(async (tx) => {
+
+    if (name || timezone) {
+      await tx.user.update({
+        where: { userId: mentorId },
+        data: {
+          ...(name && { name }),
+          ...(timezone && { timezone }),
+        },
+      });
+    }
+
+    const updatedMentor = await tx.mentor.update({
+      where: { mentorId },
+      data: {
+        ...mentorData,
+      },
+      include: {
+        user: {
+          select: {
+            userId: true,
+            name: true,
+            email: true,
+            timezone: true,
+            profileURL: true,
+          },
+        },
+      },
+    });
+
+    return updatedMentor;
+  });
+
+  return result;
+};
+
 export const mentorServices = {
   applyAsMentor,
   approveMentorApplications,
@@ -495,5 +578,7 @@ export const mentorServices = {
   getAllMentorsPublicList,
   getSingleMentorPublicProfile,
   getAllMentorsAdminList,
-  getSingleMentorAdminProfile
+  getSingleMentorAdminProfile,
+  changeMentorshipStatus,
+  updateMentorProfile,
 };

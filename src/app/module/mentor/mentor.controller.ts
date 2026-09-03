@@ -130,6 +130,39 @@ const getSingleMentorAdminProfile = catchAsync(
 	},
 );
 
+const changeMentorshipStatus = catchAsync(
+	async (req: Request, res: Response) => {
+
+		const mentorId = req.params.mentorId as string
+		const {status} = req.body;
+		
+		await mentorServices.changeMentorshipStatus(mentorId,status)
+
+		sendResponse(res, {
+			statusCode: httpStatus.OK,
+			success: true,
+			message: `Mentorship status changed to ${status}`,
+			data: null,
+		});
+	},
+);
+
+const updateMentorProfile = catchAsync(async (req: Request, res: Response) => {
+
+  const mentorId = req.user?.userId as string;
+
+  const result = await mentorServices.updateMentorProfile(mentorId, req.body);
+
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: "Mentor profile updated successfully",
+    data: result,
+  });
+});
+
+
+
 export const MentorController = {
 	ApplyAsMentor,
 	approveMentorApplications,
@@ -137,5 +170,7 @@ export const MentorController = {
 	getAllMentorsPublicList,
 	getSingleMentorPublicProfile,
 	getAllMentorsAdminList,
-	getSingleMentorAdminProfile
+	getSingleMentorAdminProfile,
+	changeMentorshipStatus,
+	updateMentorProfile
 };

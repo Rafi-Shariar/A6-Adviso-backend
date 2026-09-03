@@ -1,18 +1,32 @@
 import { VerificationStatus } from "../../../generated/prisma/enums";
 
 export interface IApplyAsMentorPayload {
-	headline: string;
-	bio: string;
-	yearOfExperience: number;
-	expertiseTags: string[];
-	linkedinURL: string;
-	professionalDomain: string;
-	portfolioURL?: string;
-	sessionCharge: number;
+  headline: string;
+  bio: string;
+  yearOfExperience: number;
+  expertiseTags: string[];
+  linkedinURL: string;
+  professionalDomain: string;
+  portfolioURL?: string;
+  sessionCharge: number;
 }
 
 export interface IApproveMentorPayload {
-	mentorId: string;
-	verificationStatus: VerificationStatus;
-	rejectionReason?: string;
+  mentorId: string;
+  verificationStatus: VerificationStatus;
+  rejectionReason?: string;
+}
+
+export interface IMentorProfileUpdatePayload {
+  name?: string;
+  timezone?: string;
+
+  headline?: string;
+  bio?: string;
+  yearOfExperience?: number;
+  expertiseTags?: string[];
+  linkedinURL?: string;
+  professionalDomain?: string;
+  portfolioURL?: string;
+  sessionCharge?: number;
 }
