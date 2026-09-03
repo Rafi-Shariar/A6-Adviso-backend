@@ -31,14 +31,12 @@ export const createSchedule = async (
 	const scheduleStartTime = new Date(startTime);
 	const scheduleEndTime = new Date(endTime);
 
-
 	if (scheduleStartTime >= scheduleEndTime) {
 		throw new AppError(
 			httpStatus.BAD_REQUEST,
 			"Start time must be strictly before end time.",
 		);
 	}
-
 
 	const today = new Date();
 	today.setHours(0, 0, 0, 0);
@@ -49,7 +47,6 @@ export const createSchedule = async (
 			"Cannot create schedules for past dates.",
 		);
 	}
-
 
 	const overlappingSchedule = await prisma.schedule.findFirst({
 		where: {
