@@ -396,5 +396,5 @@ export const AuthServices = {
 	refreshToken,
 	forgotPassword,
 	resetPassword,
-  getMe
+	getMe,
 };

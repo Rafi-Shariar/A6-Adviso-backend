@@ -35,6 +35,10 @@ router.post(
 	AuthController.resetPassword,
 );
 
-router.get('/me', auth(Role.ADMIN, Role.MENTOR, Role.SUPER_ADMIN, Role.USER), AuthController.getMe)
+router.get(
+	"/me",
+	auth(Role.ADMIN, Role.MENTOR, Role.SUPER_ADMIN, Role.USER),
+	AuthController.getMe,
+);
 
 export const AuthRoutes = router;

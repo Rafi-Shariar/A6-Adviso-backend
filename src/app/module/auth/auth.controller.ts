@@ -134,7 +134,10 @@ const getMe = catchAsync(async (req: Request, res: Response) => {
 	const user = req.user as IRequestUser;
 
 	if (!user) {
-		throw new AppError(httpStatus.UNAUTHORIZED, "User information is missing in the request");
+		throw new AppError(
+			httpStatus.UNAUTHORIZED,
+			"User information is missing in the request",
+		);
 	}
 
 	const result = await AuthServices.getMe(user);
@@ -153,5 +156,5 @@ export const AuthController = {
 	refreshToken,
 	forgotPassword,
 	resetPassword,
-	getMe
+	getMe,
 };
