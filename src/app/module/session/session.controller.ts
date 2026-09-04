@@ -37,7 +37,18 @@ const bookSession = catchAsync(async (req: Request, res: Response) => {
 	});
 });
 
+const bookAppointmentCallback = catchAsync(
+	async (req: Request, res: Response) => {
+		const { redirectURL } = await SessionServices.bookSessionCallback(
+			req.query,
+		);
+
+		res.redirect(redirectURL);
+	},
+);
+
 export const SessionController = {
 	getMentorAvailableSlots,
 	bookSession,
+	bookAppointmentCallback,
 };

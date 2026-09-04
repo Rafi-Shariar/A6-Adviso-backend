@@ -4,10 +4,16 @@ import { AppError } from "../../utils/AppError";
 import httpStatus from "http-status";
 import { IRequestUser } from "../auth/auth.interface";
 import { userInfo } from "node:os";
-import { Role } from "../../../generated/prisma/enums";
+import {
+	PaymentStatus,
+	Role,
+	SessionStatus,
+} from "../../../generated/prisma/enums";
 import { IBookSessionPayload } from "./session.interface";
 import { getBkashIdToken } from "../../lib/bkash";
 import config from "../../config";
+import { generateSessionInvoicePDF } from "../../../helper/generateInvoicePDF";
+import { transporter } from "../../lib/nodemailer";
 
 const getMentorAvailableSlots = async (mentorId: string) => {
 	const today = new Date();
@@ -153,7 +159,7 @@ const bookSession = async (
 					body: JSON.stringify({
 						mode: "0011",
 						payerReference: user.email,
-						callbackURL: `${config.bkash_callback_url}/appointment/book-appointment/payment/callback`,
+						callbackURL: `${config.bkash_callback_url}/session/book/payment/callback`,
 						amount: slot.schedule.mentor.sessionCharge,
 						currency: "BDT",
 						intent: "sale",
@@ -199,7 +205,205 @@ const bookSession = async (
 	return transactionResult;
 };
 
+export const bookSessionCallback = async (query: Record<string, any>) => {
+	const { paymentID, status } = query;
+
+	if (!paymentID) {
+		throw new AppError(httpStatus.BAD_REQUEST, "Payment ID is missing");
+	}
+
+	if (!status) {
+		throw new AppError(httpStatus.BAD_REQUEST, "Payment status is missing");
+	}
+
+	if (status === "cancel" || status === "failure") {
+		await prisma.$transaction(async (tx) => {
+			const payment = await tx.payment.findFirst({
+				where: { bkashPaymentId: paymentID },
+				include: { session: true },
+			});
+
+			if (payment) {
+				await tx.payment.update({
+					where: { paymentId: payment.paymentId },
+					data: {
+						status: PaymentStatus.FAILED,
+					},
+				});
+			}
+		});
+
+		return {
+			redirectURL: `${config.frontend_url}/dashboard/my-sessions?status=${status}`,
+		};
+	}
+
+	const bkashIdToken = await getBkashIdToken();
+
+	if (!bkashIdToken) {
+		throw new AppError(httpStatus.BAD_GATEWAY, "No Bkash Access Token Found!");
+	}
+
+	const executedPaymentResponse = await fetch(
+		`${config.bkash_base_url}/tokenized/checkout/execute`,
+		{
+			method: "POST",
+			headers: {
+				"Content-Type": "application/json",
+				Accept: "application/json",
+				Authorization: bkashIdToken,
+				"X-App-Key": config.bkash_app_key,
+			},
+			body: JSON.stringify({ paymentID }),
+		},
+	);
+
+	const executedPaymentResult = await executedPaymentResponse.json();
+
+	if (
+		executedPaymentResult.statusCode !== "0000" ||
+		!executedPaymentResult.trxID
+	) {
+		await prisma.$transaction(async (tx) => {
+			const payment = await tx.payment.findFirst({
+				where: { bkashPaymentId: paymentID },
+				include: { session: true },
+			});
+
+			if (payment) {
+				await tx.payment.update({
+					where: { paymentId: payment.paymentId },
+					data: {
+						status: PaymentStatus.FAILED,
+						gatewayResponse: executedPaymentResult,
+					},
+				});
+			}
+		});
+
+		return {
+			redirectURL: `${config.frontend_url}/dashboard/my-sessions?status=failed`,
+		};
+	}
+
+	let invoiceMailData: any = null;
+
+	await prisma.$transaction(
+		async (tx) => {
+			const payment = await tx.payment.findFirst({
+				where: { bkashPaymentId: paymentID },
+				include: {
+					session: {
+						include: {
+							mentor: { include: { user: true } },
+							slot: { include: { schedule: true } },
+							user: true,
+						},
+					},
+				},
+			});
+
+			if (!payment || !payment.session) {
+				throw new AppError(
+					httpStatus.NOT_FOUND,
+					"Session payment record not found.",
+				);
+			}
+
+			const session = payment.session;
+			const meetingLink = "https://meet.google.com/asdf-ghjk-zxc";
+
+			// সেশন কনফার্ম করা
+			await tx.session.update({
+				where: { sessionId: session.sessionId },
+				data: {
+					status: SessionStatus.COMFIRMED,
+					meetingLink,
+				},
+			});
+
+			const sessionFeeNum = Number(session.sessionFees);
+			const platformCharge = sessionFeeNum * 0.1;
+			const mentorEarnings = sessionFeeNum - platformCharge;
+
+			await tx.payment.update({
+				where: { paymentId: payment.paymentId },
+				data: {
+					status: PaymentStatus.PAID,
+					transactionId: executedPaymentResult.trxID,
+					gatewayResponse: executedPaymentResult,
+					platformCharge,
+					mentorEarnings,
+				},
+			});
+
+			invoiceMailData = {
+				session,
+				meetingLink,
+				trxID: executedPaymentResult.trxID,
+				paidAt:
+					executedPaymentResult.paymentExecuteTime || new Date().toISOString(),
+			};
+		},
+		{ maxWait: 5000, timeout: 15000 },
+	);
+
+	if (invoiceMailData) {
+		try {
+			const { session, meetingLink, trxID, paidAt } = invoiceMailData;
+
+			const invoiceBuffer = await generateSessionInvoicePDF({
+				invoiceNo: session.sessionId.slice(0, 8).toUpperCase(),
+				sessionDate: session.slot.schedule.date.toISOString().split("T")[0],
+				startTime: new Date(session.slot.startTime).toLocaleTimeString([], {
+					hour: "2-digit",
+					minute: "2-digit",
+				}),
+				endTime: new Date(session.slot.endTime).toLocaleTimeString([], {
+					hour: "2-digit",
+					minute: "2-digit",
+				}),
+				meetingLink,
+				user: {
+					name: session.user.name,
+					email: session.user.email,
+				},
+				mentor: {
+					name: session.mentor.user.name,
+					headline: session.mentor.headline,
+					email: session.mentor.user.email,
+				},
+				payment: {
+					transactionId: trxID,
+					amount: session.sessionFees.toString(),
+					paidAt,
+					paymentMethod: "bKash",
+				},
+			});
+
+			await transporter.sendMail({
+				from: config.email_sender,
+				to: session.user.email,
+				subject: "Session Confirmed & Invoice - ADVISO",
+				text: "Thank you for booking a mentorship session. Please find your official invoice attached.",
+				attachments: [
+					{
+						filename: `invoice-${session.sessionId.slice(0, 8)}.pdf`,
+						content: invoiceBuffer,
+					},
+				],
+			});
+		} catch (emailErr) {
+			console.error("Invoice email delivery failed:", emailErr);
+		}
+	}
+
+	return {
+		redirectURL: `${config.frontend_url}/dashboard/my-sessions?status=success`,
+	};
+};
 export const SessionServices = {
 	getMentorAvailableSlots,
 	bookSession,
+	bookSessionCallback,
 };
