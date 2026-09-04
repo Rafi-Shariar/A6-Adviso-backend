@@ -9,7 +9,21 @@ const router = Router();
 
 //validateRequest(UserValidation.PatientEmailVerifyZodSchema) for Zod Validation
 
-router.get('/', AnalyticsController.getPlatformAnalytics)
-router.get('/user', auth(Role.USER), AnalyticsController.getUserDashboardAnalytics)
+router.get("/", AnalyticsController.getPlatformAnalytics);
+router.get(
+	"/user",
+	auth(Role.USER),
+	AnalyticsController.getUserDashboardAnalytics,
+);
+router.get(
+	"/mentor",
+	auth(Role.MENTOR),
+	AnalyticsController.getMentorDashboardAnalytics,
+);
+router.get(
+	"/admin",
+	auth(Role.ADMIN, Role.SUPER_ADMIN),
+	AnalyticsController.getAdminDashboardAnalytics,
+);
 
 export const AnalyticsRoutes = router;
