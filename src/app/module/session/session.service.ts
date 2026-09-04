@@ -131,7 +131,7 @@ const bookSession = async (
 					mentorId: slot.schedule.mentorId,
 					scheduleId: slot.scheduleId,
 					slotId: slot.slotId,
-					sessionDate : slot.schedule.date,
+					sessionDate: slot.schedule.date,
 					sessionFees: slot.schedule.mentor.sessionCharge,
 					startUTC: slot.startTime,
 					endUTC: slot.endTime,
@@ -337,7 +337,7 @@ const bookSessionCallback = async (query: Record<string, any>) => {
 					gatewayResponse: executedPaymentResult,
 					platformCharge,
 					mentorEarnings,
-					paidAt : executedPaymentResult.paymentExecuteTime
+					paidAt: executedPaymentResult.paymentExecuteTime,
 				},
 			});
 
@@ -407,239 +407,377 @@ const bookSessionCallback = async (query: Record<string, any>) => {
 	};
 };
 
-const getMySessionUser = async(user : IRequestUser) => {
-
+const getMySessionUser = async (user: IRequestUser) => {
 	const isUserValid = await prisma.user.findUnique({
-		where : {
-			userId : user.userId,
-			isDeleted : false,
-			role : Role.USER
-		}
-	})
+		where: {
+			userId: user.userId,
+			isDeleted: false,
+			role: Role.USER,
+		},
+	});
 
-	if(!isUserValid){
-		throw new AppError(httpStatus.NOT_FOUND, "User not found")
+	if (!isUserValid) {
+		throw new AppError(httpStatus.NOT_FOUND, "User not found");
 	}
 
 	const mySessions = await prisma.session.findMany({
-    where: {
-      userId: user.userId,
-    },
-    include: {
-      mentor: {
-        select: {
-          mentorId: true,
-          headline: true,
-          user: {
-            select: {
-              name: true,
-              email: true,
-              profileURL: true,
-            },
-          },
-        },
-      },
-      payment: {
-        select: {
-          status: true,
-          amount: true,
-          paidAt: true,
-        },
-      },
-    },
-    orderBy: {
-      createdAt: "desc",
-    },
-  });
+		where: {
+			userId: user.userId,
+		},
+		include: {
+			mentor: {
+				select: {
+					mentorId: true,
+					headline: true,
+					user: {
+						select: {
+							name: true,
+							email: true,
+							profileURL: true,
+						},
+					},
+				},
+			},
+			payment: {
+				select: {
+					status: true,
+					amount: true,
+					paidAt: true,
+				},
+			},
+		},
+		orderBy: {
+			createdAt: "desc",
+		},
+	});
 
-	return mySessions
-}
+	return mySessions;
+};
 
-const getMySessionDetailsUser = async(user : IRequestUser, sessionId : string) => {
-
+const getMySessionDetailsUser = async (
+	user: IRequestUser,
+	sessionId: string,
+) => {
 	const isUserValid = await prisma.user.findUnique({
-		where : {
-			userId : user.userId,
-			isDeleted : false,
-			role : Role.USER
-		}
-	})
+		where: {
+			userId: user.userId,
+			isDeleted: false,
+			role: Role.USER,
+		},
+	});
 
-	if(!isUserValid){
-		throw new AppError(httpStatus.NOT_FOUND, "User not found")
+	if (!isUserValid) {
+		throw new AppError(httpStatus.NOT_FOUND, "User not found");
 	}
 
 	const sessionDetails = await prisma.session.findUnique({
-    where: {
-      sessionId,
-      userId: user.userId, 
-    },
-    include: {
-      mentor: {
-        select: {
-          mentorId: true,
-          headline: true,
-          user: {
-            select: {
-              name: true,
-              email: true,
-              profileURL: true,
-            },
-          },
-        },
-      },
-      payment: {
-        select: {
-          paymentId: true,
-          status: true,
-          amount: true,
-          transactionId: true,
-          paidAt: true,
-        },
-      },
-    },
-  });
+		where: {
+			sessionId,
+			userId: user.userId,
+		},
+		include: {
+			mentor: {
+				select: {
+					mentorId: true,
+					headline: true,
+					user: {
+						select: {
+							name: true,
+							email: true,
+							profileURL: true,
+						},
+					},
+				},
+			},
+			payment: {
+				select: {
+					paymentId: true,
+					status: true,
+					amount: true,
+					transactionId: true,
+					paidAt: true,
+				},
+			},
+		},
+	});
 
-  if(!sessionDetails){
-	throw new AppError(httpStatus.NOT_FOUND, "Session details not found or you do not have permission to view it")
-  }
+	if (!sessionDetails) {
+		throw new AppError(
+			httpStatus.NOT_FOUND,
+			"Session details not found or you do not have permission to view it",
+		);
+	}
 
+	return sessionDetails;
+};
 
-	return sessionDetails
-}
+const getMySessionsMentor = async (user: IRequestUser) => {
+	const mentor = await prisma.mentor.findFirst({
+		where: {
+			mentorId: user.userId,
+			isDeleted: false,
+			user: {
+				role: Role.MENTOR,
+				isDeleted: false,
+			},
+		},
+	});
 
-export const getMySessionsMentor = async (user: IRequestUser) => {
-  const mentor = await prisma.mentor.findFirst({
-    where: {
-      mentorId: user.userId,
-      isDeleted: false,
-      user: {
-        role: Role.MENTOR,
-        isDeleted: false,
-      },
-    },
-  });
+	if (!mentor) {
+		throw new AppError(httpStatus.NOT_FOUND, "Mentor profile not found");
+	}
 
-  if (!mentor) {
-    throw new AppError(httpStatus.NOT_FOUND, "Mentor profile not found");
-  }
+	const sessions = await prisma.session.findMany({
+		where: {
+			mentorId: user.userId,
+			status: SessionStatus.COMFIRMED,
+		},
+		select: {
+			sessionId: true,
+			meetingLink: true,
+			user: {
+				select: {
+					name: true,
+					profileURL: true,
+				},
+			},
+			slot: {
+				select: {
+					startTime: true,
+					endTime: true,
+					schedule: {
+						select: {
+							date: true,
+						},
+					},
+				},
+			},
+		},
+		orderBy: {
+			createdAt: "desc",
+		},
+	});
 
-  const sessions = await prisma.session.findMany({
-    where: {
-      mentorId: user.userId,
-      status: SessionStatus.COMFIRMED,
-    },
-    select: {
-      sessionId: true,
-      meetingLink: true,
-      user: {
-        select: {
-          name: true,
-          profileURL: true,
-        },
-      },
-      slot: {
-        select: {
-          startTime: true,
-          endTime: true,
-          schedule: {
-            select: {
-              date: true,
-            },
-          },
-        },
-      },
-    },
-    orderBy: {
-      createdAt: "desc",
-    },
-  });
+	return sessions;
+};
 
-  return sessions
-
-
-}
-
-export const getSessionDetailsMentor = async (
-  user: IRequestUser,
-  sessionId: string
+const getSessionDetailsMentor = async (
+	user: IRequestUser,
+	sessionId: string,
 ) => {
+	const isMentorValid = await prisma.mentor.findFirst({
+		where: {
+			mentorId: user.userId,
+			isDeleted: false,
+			user: {
+				role: Role.MENTOR,
+				isDeleted: false,
+			},
+		},
+	});
 
-  const isMentorValid = await prisma.mentor.findFirst({
-    where: {
-      mentorId: user.userId,
-      isDeleted: false,
-      user: {
-        role: Role.MENTOR,
-        isDeleted: false,
-      },
-    },
-  });
+	if (!isMentorValid) {
+		throw new AppError(
+			httpStatus.FORBIDDEN,
+			"Access denied. Only mentors can access this information.",
+		);
+	}
 
-  if (!isMentorValid) {
-    throw new AppError(
-      httpStatus.FORBIDDEN,
-      "Access denied. Only mentors can access this information."
-    );
-  }
+	const session = await prisma.session.findFirst({
+		where: {
+			sessionId,
+			mentorId: user.userId,
+		},
+		include: {
+			user: {
+				select: {
+					userId: true,
+					name: true,
+					email: true,
+					profileURL: true,
+				},
+			},
+			slot: {
+				select: {
+					slotId: true,
+					startTime: true,
+					endTime: true,
+					schedule: {
+						select: {
+							scheduleId: true,
+							date: true,
+						},
+					},
+				},
+			},
+			payment: {
+				select: {
+					paymentId: true,
+					status: true,
+					amount: true,
+					mentorEarnings: true,
+					transactionId: true,
+					paidAt: true,
+				},
+			},
+			review: {
+				select: {
+					reviewId: true,
+					ratings: true,
+					comment: true,
+					createdAt: true,
+				},
+			},
+		},
+	});
 
-  
-  const session = await prisma.session.findFirst({
-    where: {
-      sessionId,
-      mentorId: user.userId,
-    },
-    include: {
-      user: {
-        select: {
-          userId: true,
-          name: true,
-          email: true,
-          profileURL: true,
-        },
-      },
-      slot: {
-        select: {
-          slotId: true,
-          startTime: true,
-          endTime: true,
-          schedule: {
-            select: {
-              scheduleId: true,
-              date: true,
-            },
-          },
-        },
-      },
-      payment: {
-        select: {
-          paymentId: true,
-          status: true,
-          amount: true,
-          mentorEarnings: true, 
-          transactionId: true,
-          paidAt: true,
-        },
-      },
-      review: {
-        select: {
-          reviewId: true,
-          ratings: true,
-          comment: true,
-          createdAt: true,
-        },
-      },
-    },
-  });
+	if (!session) {
+		throw new AppError(
+			httpStatus.NOT_FOUND,
+			"Session details not found or you are not authorized to view this session.",
+		);
+	}
 
-  if (!session) {
-    throw new AppError(
-      httpStatus.NOT_FOUND,
-      "Session details not found or you are not authorized to view this session."
-    );
-  }
+	return session;
+};
 
-  return session;
+export const getAllSessionForAdmin = async () => {
+	const sessions = await prisma.session.findMany({
+		select: {
+			sessionId: true,
+			sessionDate: true,
+			startUTC: true,
+			endUTC: true,
+			status: true,
+			sessionFees: true,
+			user: {
+				select: {
+					name: true,
+					email: true,
+					profileURL: true,
+				},
+			},
+			mentor: {
+				select: {
+					user: {
+						select: {
+							name: true,
+							email: true,
+						},
+					},
+				},
+			},
+			payment: {
+				select: {
+					status: true,
+					platformCharge: true,
+					mentorEarnings: true,
+				},
+			},
+		},
+		orderBy: {
+			createdAt: "desc",
+		},
+	});
+
+	return sessions.map((session) => ({
+		sessionId: session.sessionId,
+		userName: session.user.name,
+		userEmail: session.user.email,
+		userProfileURL: session.user.profileURL,
+		mentorName: session.mentor.user.name,
+		mentorEmail: session.mentor.user.email,
+		date: session.sessionDate.toISOString().split("T")[0],
+		startTime: session.startUTC.toISOString(),
+		endTime: session.endUTC.toISOString(),
+		status: session.status,
+		fees: Number(session.sessionFees),
+		paymentStatus: session.payment?.status || "UNPAID",
+		platformCharge: session.payment?.platformCharge
+			? Number(session.payment.platformCharge)
+			: 0,
+		mentorEarnings: session.payment?.mentorEarnings
+			? Number(session.payment.mentorEarnings)
+			: 0,
+	}));
+};
+
+export const getSessionDetailsForAdmin = async (sessionId: string) => {
+	const session = await prisma.session.findUnique({
+		where: {
+			sessionId,
+		},
+		include: {
+			user: {
+				select: {
+					userId: true,
+					name: true,
+					email: true,
+					profileURL: true,
+					accountStatus: true,
+					createdAt: true,
+				},
+			},
+			mentor: {
+				select: {
+					mentorId: true,
+					headline: true,
+					sessionCharge: true,
+					user: {
+						select: {
+							userId: true,
+							name: true,
+							email: true,
+							profileURL: true,
+						},
+					},
+				},
+			},
+			slot: {
+				select: {
+					slotId: true,
+					startTime: true,
+					endTime: true,
+					isBooked: true,
+					schedule: {
+						select: {
+							scheduleId: true,
+							date: true,
+						},
+					},
+				},
+			},
+			payment: {
+				select: {
+					paymentId: true,
+					transactionId: true,
+					bkashPaymentId: true,
+					payerReference: true,
+					amount: true,
+					platformCharge: true,
+					mentorEarnings: true,
+					status: true,
+					paidAt: true,
+					gatewayResponse: true,
+					createdAt: true,
+				},
+			},
+			review: {
+				select: {
+					reviewId: true,
+					ratings: true,
+					comment: true,
+					createdAt: true,
+				},
+			},
+		},
+	});
+
+	if (!session) {
+		throw new AppError(httpStatus.NOT_FOUND, "Session not found");
+	}
+
+	return session;
 };
 
 export const SessionServices = {
@@ -649,5 +787,8 @@ export const SessionServices = {
 	getMySessionUser,
 	getMySessionDetailsUser,
 	getMySessionsMentor,
-	getSessionDetailsMentor
+	getSessionDetailsMentor,
+
+	getAllSessionForAdmin,
+	getSessionDetailsForAdmin,
 };
