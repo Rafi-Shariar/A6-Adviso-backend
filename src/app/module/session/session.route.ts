@@ -28,6 +28,8 @@ router.get(
 	SessionController.getMySessionDetailsMentor,
 );
 
+router.patch('/mark-complete', auth(Role.MENTOR), SessionController.completeSession)
+
 router.get(
 	"/admin/all-sessions",
 	auth(Role.ADMIN, Role.SUPER_ADMIN),

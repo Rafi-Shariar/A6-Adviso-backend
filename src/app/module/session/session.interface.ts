@@ -10,3 +10,8 @@ export interface ITimeSlot {
 export interface IBookSessionPayload {
 	purpose: string;
 }
+
+export interface ICompleteSessionPayload{
+	sessionId : string;
+	feedback : string;
+}

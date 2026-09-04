@@ -9,7 +9,7 @@ import {
 	Role,
 	SessionStatus,
 } from "../../../generated/prisma/enums";
-import { IBookSessionPayload } from "./session.interface";
+import { IBookSessionPayload, ICompleteSessionPayload } from "./session.interface";
 import { getBkashIdToken } from "../../lib/bkash";
 import config from "../../config";
 import { generateSessionInvoicePDF } from "../../../helper/generateInvoicePDF";
@@ -641,6 +641,48 @@ const getSessionDetailsMentor = async (
 	return session;
 };
 
+const completeSession = async(user : IRequestUser, payload : ICompleteSessionPayload) => {
+
+	const {sessionId, feedback} = payload
+
+	const mentor = await prisma.mentor.findUnique({
+		where : {
+			mentorId : user.userId,
+			isDeleted : false,
+			mentorshipStatus : "OPEN"
+		}
+	})
+
+	if(!mentor){
+		throw new AppError(httpStatus.NOT_FOUND, "Mentor not found")
+	}
+
+	const session = await prisma.session.findUnique({
+		where : {
+			sessionId,
+			mentorId : user.userId
+		}
+	})
+
+	if(!session){
+		throw new AppError(httpStatus.NOT_FOUND, "Session not found or this session does not belong to you")
+	}
+
+	if(session.completedSession){
+		throw new AppError(httpStatus.CONFLICT, "Session already marked as complete.")
+	}
+
+	await prisma.session.update({
+		where : {sessionId},
+		data : {
+			completedSession : true,
+			feedbackByMentor : feedback
+		}
+	})
+
+
+}
+
 export const getAllSessionForAdmin = async () => {
 	const sessions = await prisma.session.findMany({
 		select: {
@@ -786,8 +828,10 @@ export const SessionServices = {
 	bookSessionCallback,
 	getMySessionUser,
 	getMySessionDetailsUser,
+
 	getMySessionsMentor,
 	getSessionDetailsMentor,
+	completeSession,
 
 	getAllSessionForAdmin,
 	getSessionDetailsForAdmin,

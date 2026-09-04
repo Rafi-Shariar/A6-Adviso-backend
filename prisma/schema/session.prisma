@@ -21,12 +21,15 @@ model Session {
 
     status SessionStatus @default(PENDING)
     purpose String
+
     completedSession Boolean @default(false)
+    feedbackByMentor String?
 
     meetingLink String
 
     cancellationReason String?
     cancelledAt DateTime?
+    
 
 
     createdAt DateTime @default(now())

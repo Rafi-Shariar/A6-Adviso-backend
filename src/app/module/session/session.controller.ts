@@ -111,6 +111,26 @@ const getMySessionDetailsMentor = catchAsync(
 	},
 );
 
+
+const completeSession = catchAsync(
+	async (req: Request, res: Response) => {
+
+		const user = req.user!;
+		const payload = req.body;
+
+		const result = await SessionServices.completeSession(
+			user,
+			payload,
+		);
+
+		sendResponse(res, {
+			statusCode: httpStatus.OK,
+			success: true,
+			message: "Session marked as completed.",
+			data: null,
+		});
+	},
+);
 //For Admin
 const getAllSessionForAdmin = catchAsync(
 	async (req: Request, res: Response) => {
@@ -146,8 +166,12 @@ export const SessionController = {
 	bookAppointmentCallback,
 	getMySessionUser,
 	getMySessionDetailsUser,
+	
 	getMySessionMentor,
 	getMySessionDetailsMentor,
+	completeSession,
+
+
 	getAllSessionForAdmin,
 	getSessionDetailsAdmin,
 };
