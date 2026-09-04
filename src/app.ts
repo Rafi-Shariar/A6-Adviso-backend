@@ -16,6 +16,7 @@ import { MentorRoutes } from "./app/module/mentor/mentor.route";
 import { ScheduleRoutes } from "./app/module/schedule/schedule.route";
 import { SessionRoutes } from "./app/module/session/session.route";
 import { AnalyticsRoutes } from "./app/module/analytics/analytics.route";
+import { PaymentRoutes } from "./app/module/payment/payment.route";
 
 const app: Application = express();
 
@@ -39,6 +40,7 @@ app.use("/api/v1/mentor", MentorRoutes);
 app.use("/api/v1/schedule", ScheduleRoutes);
 app.use("/api/v1/session", SessionRoutes);
 app.use("/api/v1/analytics", AnalyticsRoutes);
+app.use("/api/v1/payment", PaymentRoutes);
 
 // Basic route
 app.get("/", async (req: Request, res: Response) => {
