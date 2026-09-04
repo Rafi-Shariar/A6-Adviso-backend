@@ -17,6 +17,7 @@ import { ScheduleRoutes } from "./app/module/schedule/schedule.route";
 import { SessionRoutes } from "./app/module/session/session.route";
 import { AnalyticsRoutes } from "./app/module/analytics/analytics.route";
 import { PaymentRoutes } from "./app/module/payment/payment.route";
+import { ReviewRoutes } from "./app/module/review/review.route";
 
 const app: Application = express();
 
@@ -41,6 +42,7 @@ app.use("/api/v1/schedule", ScheduleRoutes);
 app.use("/api/v1/session", SessionRoutes);
 app.use("/api/v1/analytics", AnalyticsRoutes);
 app.use("/api/v1/payment", PaymentRoutes);
+app.use("/api/v1/review", ReviewRoutes);
 
 // Basic route
 app.get("/", async (req: Request, res: Response) => {
