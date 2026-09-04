@@ -17,6 +17,50 @@ const createSchedule = catchAsync(async (req: Request, res: Response) => {
 	});
 });
 
+const getMentorSchedules = catchAsync(async (req: Request, res: Response) => {
+	const user = req.user!;
+
+	const result = await ScheduleServices.getMySchedulesMentor(user);
+
+	sendResponse(res, {
+		statusCode: httpStatus.CREATED,
+		success: true,
+		message: "Schedules retireved successfully.",
+		data: result,
+	});
+});
+
+const getAllSchedulesForAdmin = catchAsync(
+	async (req: Request, res: Response) => {
+		const user = req.user!;
+
+		const result = await ScheduleServices.getAllSchedulesForAdmin(user);
+
+		sendResponse(res, {
+			statusCode: httpStatus.CREATED,
+			success: true,
+			message: "Schedules retireved successfully.",
+			data: result,
+		});
+	},
+);
+
+const deleteSchedule = catchAsync(async (req: Request, res: Response) => {
+	const user = req.user!;
+	const { scheduleId } = req.body;
+
+	const result = await ScheduleServices.deleteScheduleMentor(user, scheduleId);
+
+	sendResponse(res, {
+		statusCode: httpStatus.OK,
+		success: true,
+		message: "Deleted Schedule.",
+		data: result,
+	});
+});
 export const ScheduleController = {
 	createSchedule,
+	getMentorSchedules,
+	getAllSchedulesForAdmin,
+	deleteSchedule,
 };

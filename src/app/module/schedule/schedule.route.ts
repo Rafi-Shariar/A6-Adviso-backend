@@ -16,4 +16,17 @@ router.post(
 	ScheduleController.createSchedule,
 );
 
+router.delete("/delete", auth(Role.MENTOR), ScheduleController.deleteSchedule);
+
+router.get(
+	"/my-schedules",
+	auth(Role.MENTOR),
+	ScheduleController.getMentorSchedules,
+);
+router.get(
+	"/admin/all-schedules",
+	auth(Role.ADMIN, Role.SUPER_ADMIN),
+	ScheduleController.getAllSchedulesForAdmin,
+);
+
 export const ScheduleRoutes = router;
