@@ -47,8 +47,37 @@ const bookAppointmentCallback = catchAsync(
 	},
 );
 
+const getMySessionUser = catchAsync(async (req: Request, res: Response) => {
+	const user = req.user!;
+
+	const result = await SessionServices.getMySessionUser(user);
+
+	sendResponse(res, {
+		statusCode: httpStatus.OK,
+		success: true,
+		message: "My sessions retrieved successfully.",
+		data: result,
+	});
+});
+
+const getMySessionDetailsUser = catchAsync(async (req: Request, res: Response) => {
+	const user = req.user!;
+	const sessionId = req.params.sessionId as string
+
+	const result = await SessionServices.getMySessionDetailsUser(user,sessionId);
+
+	sendResponse(res, {
+		statusCode: httpStatus.OK,
+		success: true,
+		message: "Session details retrieved successfully.",
+		data: result,
+	});
+});
+
 export const SessionController = {
 	getMentorAvailableSlots,
 	bookSession,
 	bookAppointmentCallback,
+	getMySessionUser,
+	getMySessionDetailsUser
 };

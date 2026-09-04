@@ -14,6 +14,7 @@ import { getBkashIdToken } from "../../lib/bkash";
 import config from "../../config";
 import { generateSessionInvoicePDF } from "../../../helper/generateInvoicePDF";
 import { transporter } from "../../lib/nodemailer";
+import { isValid } from "zod/v3";
 
 const getMentorAvailableSlots = async (mentorId: string) => {
 	const today = new Date();
@@ -205,7 +206,7 @@ const bookSession = async (
 	return transactionResult;
 };
 
-export const bookSessionCallback = async (query: Record<string, any>) => {
+const bookSessionCallback = async (query: Record<string, any>) => {
 	const { paymentID, status } = query;
 
 	if (!paymentID) {
@@ -334,6 +335,7 @@ export const bookSessionCallback = async (query: Record<string, any>) => {
 					gatewayResponse: executedPaymentResult,
 					platformCharge,
 					mentorEarnings,
+					paidAt : executedPaymentResult.paymentExecuteTime
 				},
 			});
 
@@ -402,8 +404,113 @@ export const bookSessionCallback = async (query: Record<string, any>) => {
 		redirectURL: `${config.frontend_url}/dashboard/my-sessions?status=success`,
 	};
 };
+
+const getMySessionUser = async(user : IRequestUser) => {
+
+	const isUserValid = await prisma.user.findUnique({
+		where : {
+			userId : user.userId,
+			isDeleted : false,
+			role : Role.USER
+		}
+	})
+
+	if(!isUserValid){
+		throw new AppError(httpStatus.NOT_FOUND, "User not found")
+	}
+
+	const mySessions = await prisma.session.findMany({
+    where: {
+      userId: user.userId,
+    },
+    include: {
+      mentor: {
+        select: {
+          mentorId: true,
+          headline: true,
+          user: {
+            select: {
+              name: true,
+              email: true,
+              profileURL: true,
+            },
+          },
+        },
+      },
+      payment: {
+        select: {
+          status: true,
+          amount: true,
+          paidAt: true,
+        },
+      },
+    },
+    orderBy: {
+      createdAt: "desc",
+    },
+  });
+
+	return mySessions
+}
+
+const getMySessionDetailsUser = async(user : IRequestUser, sessionId : string) => {
+
+	const isUserValid = await prisma.user.findUnique({
+		where : {
+			userId : user.userId,
+			isDeleted : false,
+			role : Role.USER
+		}
+	})
+
+	if(!isUserValid){
+		throw new AppError(httpStatus.NOT_FOUND, "User not found")
+	}
+
+	const sessionDetails = await prisma.session.findUnique({
+    where: {
+      sessionId,
+      userId: user.userId, 
+    },
+    include: {
+      mentor: {
+        select: {
+          mentorId: true,
+          headline: true,
+          user: {
+            select: {
+              name: true,
+              email: true,
+              profileURL: true,
+            },
+          },
+        },
+      },
+      payment: {
+        select: {
+          paymentId: true,
+          status: true,
+          amount: true,
+          transactionId: true,
+          paidAt: true,
+        },
+      },
+    },
+  });
+
+  if(!sessionDetails){
+	throw new AppError(httpStatus.NOT_FOUND, "Session details not found or you do not have permission to view it")
+  }
+
+
+	return sessionDetails
+}
+
+
 export const SessionServices = {
 	getMentorAvailableSlots,
 	bookSession,
 	bookSessionCallback,
+	getMySessionUser,
+	getMySessionDetailsUser
 };
