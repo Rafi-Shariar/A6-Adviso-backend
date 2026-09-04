@@ -15,6 +15,7 @@ import config from "../../config";
 import { generateSessionInvoicePDF } from "../../../helper/generateInvoicePDF";
 import { transporter } from "../../lib/nodemailer";
 import { isValid } from "zod/v3";
+import { name } from "ejs";
 
 const getMentorAvailableSlots = async (mentorId: string) => {
 	const today = new Date();
@@ -130,6 +131,7 @@ const bookSession = async (
 					mentorId: slot.schedule.mentorId,
 					scheduleId: slot.scheduleId,
 					slotId: slot.slotId,
+					sessionDate : slot.schedule.date,
 					sessionFees: slot.schedule.mentor.sessionCharge,
 					startUTC: slot.startTime,
 					endUTC: slot.endTime,
@@ -506,11 +508,146 @@ const getMySessionDetailsUser = async(user : IRequestUser, sessionId : string) =
 	return sessionDetails
 }
 
+export const getMySessionsMentor = async (user: IRequestUser) => {
+  const mentor = await prisma.mentor.findFirst({
+    where: {
+      mentorId: user.userId,
+      isDeleted: false,
+      user: {
+        role: Role.MENTOR,
+        isDeleted: false,
+      },
+    },
+  });
+
+  if (!mentor) {
+    throw new AppError(httpStatus.NOT_FOUND, "Mentor profile not found");
+  }
+
+  const sessions = await prisma.session.findMany({
+    where: {
+      mentorId: user.userId,
+      status: SessionStatus.COMFIRMED,
+    },
+    select: {
+      sessionId: true,
+      meetingLink: true,
+      user: {
+        select: {
+          name: true,
+          profileURL: true,
+        },
+      },
+      slot: {
+        select: {
+          startTime: true,
+          endTime: true,
+          schedule: {
+            select: {
+              date: true,
+            },
+          },
+        },
+      },
+    },
+    orderBy: {
+      createdAt: "desc",
+    },
+  });
+
+  return sessions
+
+
+}
+
+export const getSessionDetailsMentor = async (
+  user: IRequestUser,
+  sessionId: string
+) => {
+
+  const isMentorValid = await prisma.mentor.findFirst({
+    where: {
+      mentorId: user.userId,
+      isDeleted: false,
+      user: {
+        role: Role.MENTOR,
+        isDeleted: false,
+      },
+    },
+  });
+
+  if (!isMentorValid) {
+    throw new AppError(
+      httpStatus.FORBIDDEN,
+      "Access denied. Only mentors can access this information."
+    );
+  }
+
+  
+  const session = await prisma.session.findFirst({
+    where: {
+      sessionId,
+      mentorId: user.userId,
+    },
+    include: {
+      user: {
+        select: {
+          userId: true,
+          name: true,
+          email: true,
+          profileURL: true,
+        },
+      },
+      slot: {
+        select: {
+          slotId: true,
+          startTime: true,
+          endTime: true,
+          schedule: {
+            select: {
+              scheduleId: true,
+              date: true,
+            },
+          },
+        },
+      },
+      payment: {
+        select: {
+          paymentId: true,
+          status: true,
+          amount: true,
+          mentorEarnings: true, 
+          transactionId: true,
+          paidAt: true,
+        },
+      },
+      review: {
+        select: {
+          reviewId: true,
+          ratings: true,
+          comment: true,
+          createdAt: true,
+        },
+      },
+    },
+  });
+
+  if (!session) {
+    throw new AppError(
+      httpStatus.NOT_FOUND,
+      "Session details not found or you are not authorized to view this session."
+    );
+  }
+
+  return session;
+};
 
 export const SessionServices = {
 	getMentorAvailableSlots,
 	bookSession,
 	bookSessionCallback,
 	getMySessionUser,
-	getMySessionDetailsUser
+	getMySessionDetailsUser,
+	getMySessionsMentor,
+	getSessionDetailsMentor
 };

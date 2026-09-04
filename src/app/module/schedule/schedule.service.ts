@@ -75,7 +75,7 @@ export const createSchedule = async (
 		);
 	}
 
-	// ৫. ২০ মিনিটের স্লট ক্যালকুলেশন
+
 	const SLOT_DURATION_MS = 20 * 60 * 1000;
 	const slotsData: { startTime: Date; endTime: Date }[] = [];
 

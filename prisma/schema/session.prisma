@@ -15,11 +15,13 @@ model Session {
 
     sessionFees Decimal @db.Decimal(10,2)
 
+    sessionDate DateTime
     startUTC DateTime @db.Time(6)
     endUTC DateTime @db.Time(6)
 
     status SessionStatus @default(PENDING)
     purpose String
+    completedSession Boolean @default(false)
 
     meetingLink String
 
