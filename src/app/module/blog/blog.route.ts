@@ -8,8 +8,7 @@ import { BlogController } from "./blog.controller";
 
 const router = Router();
 
-//validateRequest(UserValidation.PatientEmailVerifyZodSchema) for Zod Validation
-
+router.get('/', BlogController.allBlogsForUser)
 router.post("/add", auth(Role.MENTOR), BlogController.uploadBlog);
 router.patch(
 	"/banner-image/:blogId",
@@ -19,7 +18,7 @@ router.patch(
 );
 router.patch("/update/:blogId", auth(Role.MENTOR), BlogController.updateBlog);
 router.delete(
-	"/delete/blogId",
+	"/delete/:blogId",
 	auth(Role.MENTOR, Role.SUPER_ADMIN, Role.ADMIN),
 	BlogController.deleteBlog,
 );

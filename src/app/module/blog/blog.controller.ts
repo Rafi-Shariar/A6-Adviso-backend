@@ -32,6 +32,19 @@ const updateBlog = catchAsync(async (req: Request, res: Response) => {
 	});
 });
 
+const allBlogsForUser = catchAsync(async (req: Request, res: Response) => {
+	
+
+	const result = await BlogServices.allBlogsForUser();
+
+	sendResponse(res, {
+		statusCode: httpStatus.OK,
+		success: true,
+		message: "Blogs retrieved successfully",
+		data: result,
+	});
+});
+
 const deleteBlog = catchAsync(async (req: Request, res: Response) => {
 	const user = req.user!;
 	const blogId = req.params.blogId as string;
@@ -125,4 +138,5 @@ export const BlogController = {
 	myBlogs,
 	allBlogsForAdmin,
 	uploadBannerImage,
+	allBlogsForUser
 };

@@ -105,6 +105,32 @@ export const updateBlog = async (
 	return updatedBlog;
 };
 
+const allBlogsForUser = async () => {
+	
+	const blogs = await prisma.blog.findMany({
+		orderBy: {
+			createdAt: "desc",
+		},
+		include: {
+			mentor: {
+				select: {
+					mentorId: true,
+					headline: true,
+					user: {
+						select: {
+							name: true,
+							email: true,
+							profileURL: true,
+						},
+					},
+				},
+			},
+		},
+	});
+
+	return blogs;
+};
+
 const deleteBlog = async (blogId: string, user: IRequestUser) => {
 	const isAuthorized = user.role === Role.MENTOR || user.role === Role.ADMIN;
 	if (!isAuthorized) {
@@ -357,4 +383,5 @@ export const BlogServices = {
 	allBlogsForAdmin,
 	blogDetails,
 	uploadBlogBannerImage,
+	allBlogsForUser
 };
