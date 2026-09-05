@@ -1,4 +1,4 @@
-import { SessionStatus } from "../../../generated/prisma/enums";
+import { Role, SessionStatus } from "../../../generated/prisma/enums";
 import { getActiveUserByEmailOrThrow } from "../../../helper/isValidUser";
 import { prisma } from "../../lib/prisma";
 import { AppError } from "../../utils/AppError";
@@ -105,7 +105,134 @@ const homepageReviews = async () => {
 	return reviews;
 };
 
+const myReviewsUser = async (user: IRequestUser) => {
+	const reviews = await prisma.review.findMany({
+		where: {
+			session: {
+				userId: user.userId,
+			},
+		},
+		include: {
+			mentor: {
+				select: {
+					mentorId: true,
+					headline: true,
+					user: {
+						select: {
+							name: true,
+							profileURL: true,
+						},
+					},
+				},
+			},
+			session: {
+				select: {
+					sessionId: true,
+					sessionDate: true,
+				},
+			},
+		},
+		orderBy: {
+			createdAt: "desc",
+		},
+	});
+
+	return reviews;
+};
+
+export const myReviewsMentor = async (user: IRequestUser) => {
+	const mentor = await prisma.mentor.findFirst({
+		where: {
+			mentorId: user.userId,
+			isDeleted: false,
+			user: {
+				role: Role.MENTOR,
+				isDeleted: false,
+			},
+		},
+	});
+
+	if (!mentor) {
+		throw new AppError(httpStatus.NOT_FOUND, "Mentor profile not found");
+	}
+
+	const reviews = await prisma.review.findMany({
+		where: {
+			mentorId: user.userId,
+		},
+		include: {
+			session: {
+				select: {
+					sessionId: true,
+					sessionDate: true,
+					user: {
+						select: {
+							name: true,
+							profileURL: true,
+						},
+					},
+				},
+			},
+		},
+		orderBy: {
+			createdAt: "desc",
+		},
+	});
+
+	return reviews;
+};
+
+export const getAllReviewsAdmin = async (user: IRequestUser) => {
+	const admin = await prisma.user.findFirst({
+		where: {
+			userId: user.userId,
+			isDeleted: false,
+		},
+	});
+
+	if (admin?.role === "MENTOR" || admin?.role === "USER") {
+		throw new AppError(httpStatus.FORBIDDEN, "Access denied. Admin only.");
+	}
+
+	const reviews = await prisma.review.findMany({
+		include: {
+			session: {
+				select: {
+					sessionId: true,
+					sessionDate: true,
+					user: {
+						select: {
+							userId: true,
+							name: true,
+							email: true,
+						},
+					},
+				},
+			},
+			mentor: {
+				select: {
+					mentorId: true,
+					user: {
+						select: {
+							name: true,
+							email: true,
+						},
+					},
+				},
+			},
+		},
+		orderBy: {
+			createdAt: "desc",
+		},
+	});
+
+	return reviews;
+};
+
 export const ReviewServices = {
 	addReview,
 	homepageReviews,
+	myReviewsUser,
+	myReviewsMentor,
+	getAllReviewsAdmin,
 };

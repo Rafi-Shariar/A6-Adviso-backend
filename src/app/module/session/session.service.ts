@@ -407,7 +407,6 @@ const bookSessionCallback = async (query: Record<string, any>) => {
 			const session = payment.session;
 			const meetingLink = "https://meet.google.com/asdf-ghjk-zxc";
 
-			
 			await tx.session.update({
 				where: { sessionId: session.sessionId },
 				data: {
@@ -533,7 +532,6 @@ export const cancelSessionByUser = async (
 			"Cannot cancel a completed session",
 		);
 	}
-
 
 	const sessionDate = new Date(session.sessionDate);
 	const startTime = new Date(session.startUTC);
@@ -699,14 +697,10 @@ export const cancelSessionByUser = async (
 				});
 			}
 		}
-		
-
 
 		return {
-			
-				refundPercentage,
-				refundAmount: calculatedRefundAmount,
-		
+			refundPercentage,
+			refundAmount: calculatedRefundAmount,
 		};
 	});
 

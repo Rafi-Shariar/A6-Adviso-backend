@@ -4,8 +4,8 @@ model Blog{
     mentorId String
     mentor Mentor @relation(fields: [mentorId], references: [mentorId], onDelete: Cascade, onUpdate: Cascade)
 
-    bannerImage String
-    bannerImagePublicId String
+    bannerImage String?
+    bannerImagePublicId String?
 
     title String @unique
     content String

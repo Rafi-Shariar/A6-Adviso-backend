@@ -19,6 +19,7 @@ import { AnalyticsRoutes } from "./app/module/analytics/analytics.route";
 import { PaymentRoutes } from "./app/module/payment/payment.route";
 import { ReviewRoutes } from "./app/module/review/review.route";
 import { UserRoutes } from "./app/module/user/user.route";
+import { BlogRoutes } from "./app/module/blog/blog.route";
 
 const app: Application = express();
 
@@ -45,6 +46,7 @@ app.use("/api/v1/analytics", AnalyticsRoutes);
 app.use("/api/v1/payment", PaymentRoutes);
 app.use("/api/v1/review", ReviewRoutes);
 app.use("/api/v1/user", UserRoutes);
+app.use("/api/v1/blog", BlogRoutes);
 
 // Basic route
 app.get("/", async (req: Request, res: Response) => {

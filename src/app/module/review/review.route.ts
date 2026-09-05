@@ -19,4 +19,16 @@ router.post(
 
 router.get("/", ReviewController.homepageReview);
 
+router.get("/my-reviews", auth(Role.USER), ReviewController.getMyReviews);
+router.get(
+	"/mentor-reviews",
+	auth(Role.USER),
+	ReviewController.getMyReviewsMentor,
+);
+router.get(
+	"/admin/all-reviews",
+	auth(Role.USER),
+	ReviewController.getAllReviewsAdmin,
+);
+
 export const ReviewRoutes = router;

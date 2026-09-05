@@ -30,7 +30,45 @@ const homepageReview = catchAsync(async (req: Request, res: Response) => {
 	});
 });
 
+const getMyReviews = catchAsync(async (req: Request, res: Response) => {
+	const user = req.user!;
+	const result = await ReviewServices.myReviewsUser(user);
+
+	sendResponse(res, {
+		statusCode: httpStatus.OK,
+		success: true,
+		message: "Reviews retrieved successfully",
+		data: result,
+	});
+});
+
+const getMyReviewsMentor = catchAsync(async (req: Request, res: Response) => {
+	const user = req.user!;
+	const result = await ReviewServices.myReviewsMentor(user);
+
+	sendResponse(res, {
+		statusCode: httpStatus.OK,
+		success: true,
+		message: "Reviews retrieved successfully",
+		data: result,
+	});
+});
+
+const getAllReviewsAdmin = catchAsync(async (req: Request, res: Response) => {
+	const user = req.user!;
+	const result = await ReviewServices.getAllReviewsAdmin(user);
+
+	sendResponse(res, {
+		statusCode: httpStatus.OK,
+		success: true,
+		message: "Reviews retrieved successfully",
+		data: result,
+	});
+});
 export const ReviewController = {
 	addReview,
 	homepageReview,
+	getMyReviews,
+	getMyReviewsMentor,
+	getAllReviewsAdmin,
 };
