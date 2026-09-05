@@ -35,6 +35,10 @@ model Mentor {
     blogs Blog[]
     reviews Review[]
 
+    @@index([verificationStatus, isDeleted])
+    @@index([professionalDomain, verificationStatus, isDeleted])
+    @@index([sessionCharge])
+
     @@map("mentors")
 
 }

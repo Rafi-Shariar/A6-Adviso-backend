@@ -22,5 +22,8 @@ model User {
   mentor Mentor?
   sessions Session[]
 
+  @@index([role, isDeleted])
+  @@index([accountStatus, isDeleted])
+
   @@map("users")
 }

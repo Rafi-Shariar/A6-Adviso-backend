@@ -14,5 +14,9 @@ model Slot {
 
   session    Session[]
 
+
+  @@index([scheduleId, isBooked])
+  @@index([scheduleId, startTime])
+
   @@map("slots")
 }
