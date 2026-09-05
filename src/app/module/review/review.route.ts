@@ -10,6 +10,13 @@ import { ReviewController } from "./review.controller";
 const router = Router();
 
 //validateRequest(UserValidation.PatientEmailVerifyZodSchema) for Zod Validation
-router.post('/add-review', auth(Role.USER), validateRequest(ReviewValidation.addReviewValidationSchema), ReviewController.addReview)
+router.post(
+	"/add-review",
+	auth(Role.USER),
+	validateRequest(ReviewValidation.addReviewValidationSchema),
+	ReviewController.addReview,
+);
+
+router.get("/", ReviewController.homepageReview);
 
 export const ReviewRoutes = router;

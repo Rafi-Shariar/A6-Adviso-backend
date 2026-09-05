@@ -37,15 +37,37 @@ const bookSession = catchAsync(async (req: Request, res: Response) => {
 	});
 });
 
-const bookAppointmentCallback = catchAsync(
-	async (req: Request, res: Response) => {
-		const { redirectURL } = await SessionServices.bookSessionCallback(
-			req.query,
-		);
+const paySession = catchAsync(async (req: Request, res: Response) => {
+	const { sessionId } = req.body;
+	const user = req.user!;
 
-		res.redirect(redirectURL);
-	},
-);
+	const result = await SessionServices.paySession(sessionId, user);
+	sendResponse(res, {
+		statusCode: httpStatus.OK,
+		success: true,
+		message: "Session Payment Initiated Successfully",
+		data: result,
+	});
+});
+
+const bookSessionCallback = catchAsync(async (req: Request, res: Response) => {
+	const { redirectURL } = await SessionServices.bookSessionCallback(req.query);
+
+	res.redirect(redirectURL);
+});
+
+const cancelSesionByUser = catchAsync(async (req: Request, res: Response) => {
+	const payload = req.body;
+	const user = req.user!;
+
+	const result = await SessionServices.cancelSessionByUser(payload, user);
+	sendResponse(res, {
+		statusCode: httpStatus.OK,
+		success: true,
+		message: "Session Cancelled And Refunded Successfully",
+		data: result,
+	});
+});
 
 const getMySessionUser = catchAsync(async (req: Request, res: Response) => {
 	const user = req.user!;
@@ -111,26 +133,19 @@ const getMySessionDetailsMentor = catchAsync(
 	},
 );
 
+const completeSession = catchAsync(async (req: Request, res: Response) => {
+	const user = req.user!;
+	const payload = req.body;
 
-const completeSession = catchAsync(
-	async (req: Request, res: Response) => {
+	const result = await SessionServices.completeSession(user, payload);
 
-		const user = req.user!;
-		const payload = req.body;
-
-		const result = await SessionServices.completeSession(
-			user,
-			payload,
-		);
-
-		sendResponse(res, {
-			statusCode: httpStatus.OK,
-			success: true,
-			message: "Session marked as completed.",
-			data: null,
-		});
-	},
-);
+	sendResponse(res, {
+		statusCode: httpStatus.OK,
+		success: true,
+		message: "Session marked as completed.",
+		data: null,
+	});
+});
 //For Admin
 const getAllSessionForAdmin = catchAsync(
 	async (req: Request, res: Response) => {
@@ -163,14 +178,15 @@ const getSessionDetailsAdmin = catchAsync(
 export const SessionController = {
 	getMentorAvailableSlots,
 	bookSession,
-	bookAppointmentCallback,
+	paySession,
+	bookSessionCallback,
 	getMySessionUser,
 	getMySessionDetailsUser,
-	
+	cancelSesionByUser,
+
 	getMySessionMentor,
 	getMySessionDetailsMentor,
 	completeSession,
-
 
 	getAllSessionForAdmin,
 	getSessionDetailsAdmin,

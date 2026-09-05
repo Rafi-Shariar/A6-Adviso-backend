@@ -18,6 +18,7 @@ import { SessionRoutes } from "./app/module/session/session.route";
 import { AnalyticsRoutes } from "./app/module/analytics/analytics.route";
 import { PaymentRoutes } from "./app/module/payment/payment.route";
 import { ReviewRoutes } from "./app/module/review/review.route";
+import { UserRoutes } from "./app/module/user/user.route";
 
 const app: Application = express();
 
@@ -43,6 +44,7 @@ app.use("/api/v1/session", SessionRoutes);
 app.use("/api/v1/analytics", AnalyticsRoutes);
 app.use("/api/v1/payment", PaymentRoutes);
 app.use("/api/v1/review", ReviewRoutes);
+app.use("/api/v1/user", UserRoutes);
 
 // Basic route
 app.get("/", async (req: Request, res: Response) => {

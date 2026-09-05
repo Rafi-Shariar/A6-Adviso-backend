@@ -12,7 +12,7 @@ model Slot {
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
 
-  session    Session? 
+  session    Session[]
 
   @@map("slots")
 }

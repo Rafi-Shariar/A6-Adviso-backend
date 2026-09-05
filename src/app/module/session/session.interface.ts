@@ -11,7 +11,12 @@ export interface IBookSessionPayload {
 	purpose: string;
 }
 
-export interface ICompleteSessionPayload{
-	sessionId : string;
-	feedback : string;
+export interface ICompleteSessionPayload {
+	sessionId: string;
+	feedback: string;
+}
+
+export interface ICancelSessionPayload {
+	sessionId: string;
+	cancellationReason?: string;
 }

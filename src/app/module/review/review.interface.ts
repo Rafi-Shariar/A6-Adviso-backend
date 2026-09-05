@@ -1,5 +1,5 @@
 export interface IAddReviewPayload {
-	sessionId : string;
-	ratings : number;
-	review : string;
+	sessionId: string;
+	ratings: number;
+	review: string;
 }

@@ -3,19 +3,22 @@ import { prisma } from "../../lib/prisma";
 import { AppError } from "../../utils/AppError";
 import httpStatus from "http-status";
 import { IRequestUser } from "../auth/auth.interface";
-import { userInfo } from "node:os";
 import {
 	PaymentStatus,
 	Role,
 	SessionStatus,
 } from "../../../generated/prisma/enums";
-import { IBookSessionPayload, ICompleteSessionPayload } from "./session.interface";
+import {
+	IBookSessionPayload,
+	ICancelSessionPayload,
+	ICompleteSessionPayload,
+} from "./session.interface";
 import { getBkashIdToken } from "../../lib/bkash";
 import config from "../../config";
 import { generateSessionInvoicePDF } from "../../../helper/generateInvoicePDF";
 import { transporter } from "../../lib/nodemailer";
-import { isValid } from "zod/v3";
-import { name } from "ejs";
+
+import { RequestUser } from "../../middleware/checkAuth";
 
 const getMentorAvailableSlots = async (mentorId: string) => {
 	const today = new Date();
@@ -208,6 +211,94 @@ const bookSession = async (
 	return transactionResult;
 };
 
+const paySession = async (sessionId: string, user: RequestUser) => {
+	await getActiveUserByEmailOrThrow(user.email);
+
+	const session = await prisma.session.findFirst({
+		where: {
+			sessionId,
+			userId: user.userId,
+		},
+		include: {
+			slot: true,
+		},
+	});
+
+	if (!session) {
+		throw new AppError(httpStatus.NOT_FOUND, "Invalid session ID");
+	}
+
+	if (session.status === "COMFIRMED" || session.status === "CANCELLED") {
+		throw new AppError(
+			httpStatus.CONFLICT,
+			`The session is already ${session.status}. Can't Pay.`,
+		);
+	}
+
+	if (!session.slot || !session.slot.isBooked) {
+		throw new AppError(
+			httpStatus.REQUEST_TIMEOUT,
+			"Reservation timeout or slot released. Please book the session again to pay.",
+		);
+	}
+
+	const amount = session.sessionFees.toString();
+	const bkashIdToken = await getBkashIdToken();
+
+	if (!bkashIdToken) {
+		throw new AppError(httpStatus.BAD_GATEWAY, "No Bkash Access Token Found!");
+	}
+
+	const bkashCreatePaymentResponse = await fetch(
+		`${config.bkash_base_url}/tokenized/checkout/create`,
+		{
+			method: "POST",
+			headers: {
+				"Content-Type": "application/json",
+				Accept: "application/json",
+				Authorization: bkashIdToken,
+				"X-App-Key": config.bkash_app_key,
+			},
+			body: JSON.stringify({
+				mode: "0011",
+				payerReference: user.email,
+				callbackURL: `${config.bkash_callback_url}/session/book/payment/callback`,
+				amount: amount,
+				currency: "BDT",
+				intent: "sale",
+				merchantInvoiceNumber: session.sessionId,
+			}),
+		},
+	);
+
+	const bkashCreatePaymentResult = await bkashCreatePaymentResponse.json();
+
+	if (
+		bkashCreatePaymentResult.statusCode !== "0000" ||
+		!bkashCreatePaymentResult.bkashURL
+	) {
+		throw new AppError(
+			httpStatus.BAD_REQUEST,
+			bkashCreatePaymentResult.statusMessage ||
+				"bKash checkout URL generation failed.",
+		);
+	}
+
+	await prisma.payment.update({
+		where: {
+			sessionId: sessionId,
+		},
+		data: {
+			gatewayResponse: bkashCreatePaymentResult,
+			bkashPaymentId: bkashCreatePaymentResult.paymentID,
+		},
+	});
+
+	return {
+		paymentURL: bkashCreatePaymentResult.bkashURL,
+	};
+};
+
 const bookSessionCallback = async (query: Record<string, any>) => {
 	const { paymentID, status } = query;
 
@@ -316,7 +407,7 @@ const bookSessionCallback = async (query: Record<string, any>) => {
 			const session = payment.session;
 			const meetingLink = "https://meet.google.com/asdf-ghjk-zxc";
 
-			// সেশন কনফার্ম করা
+			
 			await tx.session.update({
 				where: { sessionId: session.sessionId },
 				data: {
@@ -334,6 +425,7 @@ const bookSessionCallback = async (query: Record<string, any>) => {
 				data: {
 					status: PaymentStatus.PAID,
 					transactionId: executedPaymentResult.trxID,
+					bkashTrxId: executedPaymentResult.trxID,
 					gatewayResponse: executedPaymentResult,
 					platformCharge,
 					mentorEarnings,
@@ -407,6 +499,220 @@ const bookSessionCallback = async (query: Record<string, any>) => {
 	};
 };
 
+export const cancelSessionByUser = async (
+	payload: ICancelSessionPayload,
+	user: RequestUser,
+) => {
+	const { sessionId, cancellationReason } = payload;
+
+	const session = await prisma.session.findFirst({
+		where: {
+			sessionId,
+			userId: user.userId,
+		},
+		include: {
+			payment: true,
+			slot: true,
+		},
+	});
+
+	if (!session) {
+		throw new AppError(
+			httpStatus.NOT_FOUND,
+			"Session not found or unauthorized",
+		);
+	}
+
+	if (session.status === SessionStatus.CANCELLED) {
+		throw new AppError(httpStatus.BAD_REQUEST, "Session is already cancelled");
+	}
+
+	if (session.completedSession) {
+		throw new AppError(
+			httpStatus.BAD_REQUEST,
+			"Cannot cancel a completed session",
+		);
+	}
+
+
+	const sessionDate = new Date(session.sessionDate);
+	const startTime = new Date(session.startUTC);
+
+	const sessionStartDateTime = new Date(
+		sessionDate.getFullYear(),
+		sessionDate.getMonth(),
+		sessionDate.getDate(),
+		startTime.getUTCHours(),
+		startTime.getUTCMinutes(),
+		startTime.getUTCSeconds(),
+	);
+
+	const now = new Date();
+	const diffInMilliseconds = sessionStartDateTime.getTime() - now.getTime();
+	const hoursLeft = diffInMilliseconds / (1000 * 60 * 60);
+
+	if (hoursLeft <= 0) {
+		throw new AppError(
+			httpStatus.BAD_REQUEST,
+			"Cannot cancel a session that has already started or passed",
+		);
+	}
+
+	let refundPercentage = 0;
+	if (hoursLeft >= 48) {
+		refundPercentage = 100;
+	} else if (hoursLeft >= 24) {
+		refundPercentage = 50;
+	} else if (hoursLeft >= 12) {
+		refundPercentage = 25;
+	} else {
+		refundPercentage = 0;
+	}
+
+	const isEligibleForRefund =
+		refundPercentage > 0 &&
+		session.payment?.status === PaymentStatus.PAID &&
+		session.payment.bkashPaymentId &&
+		session.payment.bkashTrxId;
+
+	let calculatedRefundAmount = 0;
+	let bkashRefundResult: any = null;
+
+	if (isEligibleForRefund) {
+		const totalPaidAmount = Number(session.payment!.amount);
+		calculatedRefundAmount = Number(
+			((totalPaidAmount * refundPercentage) / 100).toFixed(2),
+		);
+
+		const bkashIdToken = await getBkashIdToken();
+
+		if (!bkashIdToken) {
+			throw new AppError(
+				httpStatus.BAD_GATEWAY,
+				"Failed to retrieve bKash authorization token",
+			);
+		}
+
+		const bkashRefundResponse = await fetch(
+			`${config.bkash_base_url}/tokenized/checkout/payment/refund`,
+			{
+				method: "POST",
+				headers: {
+					"Content-Type": "application/json",
+					Accept: "application/json",
+					Authorization: bkashIdToken,
+					"X-App-Key": config.bkash_app_key,
+				},
+				body: JSON.stringify({
+					paymentID: session.payment!.bkashPaymentId,
+					trxID: session.payment!.bkashTrxId,
+					amount: calculatedRefundAmount.toString(),
+					sku: "Session Cancellation",
+					reason: cancellationReason || "Session cancelled by user",
+				}),
+			},
+		);
+
+		bkashRefundResult = await bkashRefundResponse.json();
+
+		if (bkashRefundResult.statusCode !== "0000") {
+			throw new AppError(
+				httpStatus.BAD_REQUEST,
+				bkashRefundResult.statusMessage || "bKash refund processing failed",
+			);
+		}
+	}
+
+	const result = await prisma.$transaction(async (tx) => {
+		const updatedSession = await tx.session.update({
+			where: {
+				sessionId: session.sessionId,
+			},
+			data: {
+				status: SessionStatus.CANCELLED,
+				cancellationReason:
+					cancellationReason ||
+					`Cancelled by user. (${refundPercentage}% refund applied)`,
+				cancelledAt: now,
+			},
+		});
+
+		await tx.slot.update({
+			where: {
+				slotId: session.slotId,
+			},
+			data: {
+				isBooked: false,
+			},
+		});
+
+		let updatedPayment = session.payment;
+
+		if (session.payment) {
+			if (isEligibleForRefund && bkashRefundResult) {
+				const originalAmount = Number(session.payment!.amount);
+				const remainingAmount = originalAmount - calculatedRefundAmount;
+
+				const PLATFORM_COMMISSION_RATE = 0.1;
+
+				let updatedPlatformCharge = 0;
+				let updatedMentorEarnings = 0;
+
+				if (remainingAmount > 0) {
+					updatedPlatformCharge = Number(
+						(remainingAmount * PLATFORM_COMMISSION_RATE).toFixed(2),
+					);
+					updatedMentorEarnings = Number(
+						(remainingAmount - updatedPlatformCharge).toFixed(2),
+					);
+				}
+
+				updatedPayment = await tx.payment.update({
+					where: {
+						sessionId: session.sessionId,
+					},
+					data: {
+						status:
+							refundPercentage === 100
+								? PaymentStatus.REFUNDED
+								: PaymentStatus.PAID,
+						refundTrxId: bkashRefundResult.refundTrxID,
+						refundAmount: calculatedRefundAmount,
+						refundedAt:
+							bkashRefundResult.completedTime || new Date().toISOString(),
+						refundReason:
+							cancellationReason ||
+							`Cancelled with ${refundPercentage}% refund`,
+						gatewayResponse: bkashRefundResult,
+						platformCharge: updatedPlatformCharge,
+						mentorEarnings: updatedMentorEarnings,
+					},
+				});
+			} else if (
+				refundPercentage === 0 &&
+				session.payment.status === PaymentStatus.PAID
+			) {
+				updatedPayment = await tx.payment.findUnique({
+					where: {
+						sessionId: session.sessionId,
+					},
+				});
+			}
+		}
+		
+
+
+		return {
+			
+				refundPercentage,
+				refundAmount: calculatedRefundAmount,
+		
+		};
+	});
+
+	return result;
+};
+
 const getMySessionUser = async (user: IRequestUser) => {
 	const isUserValid = await prisma.user.findUnique({
 		where: {
@@ -470,7 +776,7 @@ const getMySessionDetailsUser = async (
 		throw new AppError(httpStatus.NOT_FOUND, "User not found");
 	}
 
-	const sessionDetails = await prisma.session.findUnique({
+	const sessionDetails = await prisma.session.findFirst({
 		where: {
 			sessionId,
 			userId: user.userId,
@@ -641,47 +947,53 @@ const getSessionDetailsMentor = async (
 	return session;
 };
 
-const completeSession = async(user : IRequestUser, payload : ICompleteSessionPayload) => {
-
-	const {sessionId, feedback} = payload
+const completeSession = async (
+	user: IRequestUser,
+	payload: ICompleteSessionPayload,
+) => {
+	const { sessionId, feedback } = payload;
 
 	const mentor = await prisma.mentor.findUnique({
-		where : {
-			mentorId : user.userId,
-			isDeleted : false,
-			mentorshipStatus : "OPEN"
-		}
-	})
+		where: {
+			mentorId: user.userId,
+			isDeleted: false,
+			mentorshipStatus: "OPEN",
+		},
+	});
 
-	if(!mentor){
-		throw new AppError(httpStatus.NOT_FOUND, "Mentor not found")
+	if (!mentor) {
+		throw new AppError(httpStatus.NOT_FOUND, "Mentor not found");
 	}
 
 	const session = await prisma.session.findUnique({
-		where : {
+		where: {
 			sessionId,
-			mentorId : user.userId
-		}
-	})
+			mentorId: user.userId,
+		},
+	});
 
-	if(!session){
-		throw new AppError(httpStatus.NOT_FOUND, "Session not found or this session does not belong to you")
+	if (!session) {
+		throw new AppError(
+			httpStatus.NOT_FOUND,
+			"Session not found or this session does not belong to you",
+		);
 	}
 
-	if(session.completedSession){
-		throw new AppError(httpStatus.CONFLICT, "Session already marked as complete.")
+	if (session.completedSession) {
+		throw new AppError(
+			httpStatus.CONFLICT,
+			"Session already marked as complete.",
+		);
 	}
 
 	await prisma.session.update({
-		where : {sessionId},
-		data : {
-			completedSession : true,
-			feedbackByMentor : feedback
-		}
-	})
-
-
-}
+		where: { sessionId },
+		data: {
+			completedSession: true,
+			feedbackByMentor: feedback,
+		},
+	});
+};
 
 export const getAllSessionForAdmin = async () => {
 	const sessions = await prisma.session.findMany({
@@ -825,7 +1137,9 @@ export const getSessionDetailsForAdmin = async (sessionId: string) => {
 export const SessionServices = {
 	getMentorAvailableSlots,
 	bookSession,
+	paySession,
 	bookSessionCallback,
+	cancelSessionByUser,
 	getMySessionUser,
 	getMySessionDetailsUser,
 

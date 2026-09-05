@@ -6,11 +6,10 @@ import { sendResponse } from "../../utils/sendResponse";
 import { ReviewServices } from "./review.service";
 
 const addReview = catchAsync(async (req: Request, res: Response) => {
-
 	const user = req.user!;
 	const payload = req.body;
 
-	const result = await ReviewServices.addReview(user, payload)
+	const result = await ReviewServices.addReview(user, payload);
 
 	sendResponse(res, {
 		statusCode: httpStatus.OK,
@@ -20,6 +19,18 @@ const addReview = catchAsync(async (req: Request, res: Response) => {
 	});
 });
 
+const homepageReview = catchAsync(async (req: Request, res: Response) => {
+	const result = await ReviewServices.homepageReviews();
+
+	sendResponse(res, {
+		statusCode: httpStatus.OK,
+		success: true,
+		message: "Reviews retrieved successfully",
+		data: result,
+	});
+});
+
 export const ReviewController = {
-	addReview
+	addReview,
+	homepageReview,
 };
