@@ -239,6 +239,10 @@ const getPaymentDetailsAdmin = async (
 		},
 	});
 
+	if(!paymentDetails){
+		throw new AppError(httpStatus.NOT_FOUND, "Invalid session Id")
+	}
+
 	return paymentDetails;
 };
 

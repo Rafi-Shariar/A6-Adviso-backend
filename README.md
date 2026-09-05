@@ -1,140 +1,102 @@
-# Backend Setup & Starter Guide With Ts | Postgress | Prisma
+# Adviso - Mentor Booking & Consultation Platform
 
-## 1. Overview
-
-PH Healthcare System Backend is a production-ready, full-stack REST API built with **Express (v5)**, **TypeScript**, and **Prisma ORM** over PostgreSQL. The application is structured around modular domain design and includes pre-configured tools for authentication, caching, file storage, email dispatching, and linting.
-
-This document outlines the step-by-step procedure required to configure your environment, initialize the database, understand pre-installed dependencies, and run the server locally.
+Adviso is a production-grade backend REST API built to streamline 1-on-1 mentorship bookings, secure payments, and professional knowledge sharing. It offers role-based access control (RBAC), conflict-free scheduling, automated slot management, and advanced search and filtering.
 
 ---
 
-## 2. Pre-Installed Tech Stack & Packages
+## Live Links & Resources
 
-The template comes pre-configured with the following core modules and packages:
-
-| Category | Tools & Libraries | Purpose |
-| :--- | :--- | :--- |
-| **Runtime & Framework** | `express` (v5.x), `typescript` (v7.x), `tsx` | High-performance API server with native ESM support and live reload |
-| **Database & ORM** | `prisma`, `@prisma/client`, `@prisma/adapter-pg`, `pg` | PostgreSQL multi-file schema management and typed query building |
-| **Authentication & Security** | `jsonwebtoken`, `bcryptjs`, `google-auth-library`, `cookie-parser`, `cors` | Token-based auth, Google OAuth, password hashing, and cookie handling |
-| **Validation & Error Handling**| `zod`, `http-status` | Schema validation for payloads and centralized HTTP status constants |
-| **Caching & In-Memory** | `redis` | Session storage, caching, and rate limiting support |
-| **File Handling & Cloud** | `multer`, `cloudinary` | Multipart form parsing and cloud media upload management |
-| **Email & Notifications** | `nodemailer`, `ejs` | Transactional email delivery with HTML template rendering |
-| **Linting & Code Style** | `@biomejs/biome` | Ultra-fast TypeScript code formatting and static analysis |
+* **Live Backend API:** [LINK](https://adviso-backend.vercel.app)
+* **Demonstration Video:** [Watch Project Walkthrough](https://drive.google.com/file/d/12wI9XQdOzY8RtlAfEB0AtOBtGqMLhQX1/view?usp=sharing)
 
 ---
 
-## 3. Environment Variables Configuration (`.env`)
+## Entity Relationship Diagram (ERD)
 
-Before running the server, duplicate `.env.example` to create `.env`:
+![Adviso ERD](./ERD.png)
 
-```bash
-cp .env.example .env
-```
-
-Review and update the variables according to your local/cloud setup:
-
-| Variable | Required Action / Description |
-| :--- | :--- |
-| `NODE_ENV` | Set to `development` or `production`. |
-| `PORT` | Local server port (Default: `5000`). |
-| `DATABASE_URL` | **Mandatory:** Replace with your actual PostgreSQL connection string: `postgresql://<user>:<password>@<host>:<port>/<database>?schema=public`. |
-| `JWT_ACCESS_SECRET` | 256-bit secret string for short-lived access tokens. |
-| `JWT_REFRESH_SECRET` | 256-bit secret string for long-lived refresh tokens. |
-| `JWT_ACCESS_EXPIRES_IN` | Access token lifespan (e.g., `1d`, `15m`). |
-| `JWT_REFRESH_EXPIRES_IN` | Refresh token lifespan (e.g., `7d`, `30d`). |
-| `BCRYPT_SALT_ROUNDS` | Cost factor for hashing (Default: `10`). |
-| `BACKEND_URL` | Base API URL (e.g., `http://localhost:5000`). |
-| `FRONTEND_URL` | Allowed client origin for CORS policy (e.g., `http://localhost:3000`). |
-| `GOOGLE_CLIENT_ID` | OAuth Client ID from Google Cloud Console for Google Sign-In. |
-| `SUPER_ADMIN_NAME` | Default display name for the root administrator. |
-| `SUPER_ADMIN_EMAIL` | Default administrator email address. |
-| `SUPER_ADMIN_PASSWORD` | Default administrator login password. |
-| `REDIS_USER` | Redis instance username (`default` for standard setups). |
-| `REDIS_PASSWORD` | Redis connection password. |
-| `REDIS_HOST` | Redis hostname or cloud URI. |
-| `REDIS_PORT` | Redis server port (Default: `6379` or cloud port). |
-| `SMTP_USER` | Email address configured for Nodemailer. |
-| `EMAIL_SENDER` | Display email address for outbound emails. |
-| `SMTP_PASSWORD` | App-specific password generated from Google Account Security. |
-| `CLOUDINARY_CLOUD_NAME`| Cloud name from Cloudinary Dashboard. |
-| `CLOUDINARY_API_KEY` | API key from Cloudinary Dashboard. |
-| `CLOUDINARY_API_SECRET` | API secret key from Cloudinary Dashboard. |
 
 ---
 
-## 4. Step-by-Step Setup & Execution
+## System Flow
 
-### Step 1: Install Dependencies
-Download and link all project dependencies:
-```bash
-npm install
-```
-
-### Step 2: Configure Environment
-Copy and populate the required environment variables:
-```bash
-cp .env.example .env
-```
-
-### Step 3: Database Synchronization & Client Generation
-Synchronize the Prisma models located in `prisma/schema/` with your PostgreSQL database and generate the Prisma Client:
-```bash
-# Push schema changes directly to the database
-npx prisma db push
-
-# Generate client definitions into src/generated/prisma
-npx prisma generate
-```
-
-### Step 4: Launch Development Server
-Start the application in watch mode using `tsx`:
-```bash
-npm run dev
-```
-The server will boot up at `http://localhost:5000` (or your configured `PORT`).
+1. **Authentication & Roles:** Users register and authenticate via JWT. Supported roles include `USER`, `MENTOR`, `ADMIN`, and `SUPER_ADMIN`.
+2. **Mentor Onboarding:** Users apply for mentorship status with professional domains, experience, and credentials. Admins review and approve applications.
+3. **Availability & Scheduling:** Approved mentors generate available consultation dates and discrete booking slots (`Slot`).
+4. **Booking & Automated Release:** A user selects a slot to schedule a `Session`. If payment is not completed within 15 minutes, an automated background cron job cancels the pending session and releases the slot for other users.
+5. **Knowledge Sharing:** Mentors write technical blogs with Cloudinary-backed banner images.
 
 ---
 
-## 5. NPM Scripts Reference
+## Demo Credentials
 
-| Script | Command | Purpose |
-| :--- | :--- | :--- |
-| `npm run dev` | `tsx watch src/server.ts` | Runs the server in hot-reload watch mode. |
-| `npm run build` | `tsc` | Compiles TypeScript source files into `dist/`. |
-| `npm run start` | `node dist/src/server.js` | Runs the compiled production code. |
-| `npm run format:check` | `npx @biomejs/biome format ./src` | Checks codebase formatting according to Biome standards. |
-| `npm run format:fix` | `npx @biomejs/biome format --write ./src` | Automatically formats codebase files. |
-| `npm run lint:check` | `npx @biomejs/biome lint ./src` | Inspects code for potential linting errors. |
-| `npm run lint:fix` | `npx @biomejs/biome lint --write ./src` | Automatically fixes autofixable lint errors. |
+| Role | Email | Password |
+|---|---|---|
+| **Default User** | `user@gmail.com` | `User@user12345` |
+| **Default Admin** | `admin@gmail.com` | `Admin@admin12345` |
+| **Demo Mentor** | `tahmid.rahman@example.com` | `Password123!` |
+
+---
+## Tech Stack
+
+| Category | Technology | Purpose |
+|---|---|---|
+| **Runtime & Core** | Node.js (ES Modules), TypeScript, Express.js | Backend server runtime and REST API framework |
+| **Database & ORM** | PostgreSQL (Neon Serverless), Prisma ORM (`@prisma/client`, `@prisma/adapter-pg`, `pg`) | Relational database modeling, migrations, and query execution |
+| **Caching & In-Memory** | Redis (`redis`) | High-speed data caching and session/rate tracking |
+| **Validation & Security** | Zod, BcryptJS, JWT (`jsonwebtoken`), Google Auth Library, Express Rate Limit | Request schema validation, password hashing, RBAC, OAuth2 verification, and DDoS protection |
+| **Media & File Handling**| Cloudinary, Multer, PDFKit | Cloud asset management, multipart file uploads, and PDF invoice/document generation |
+| **Email & Templating** | Nodemailer, EJS | Dynamic HTML transactional emails and notifications |
+| **Automation** | Node-Cron | Scheduled cron jobs for automatic slot release and data cleanup |
+| **Build & Tooling** | Tsup, TSX, Biome (`@biomejs/biome`) | Bundling, TypeScript hot-reload execution, high-performance linting and formatting |
 
 ---
 
-## 6. Directory Structure
+## Prisma Schemas Overview
 
-```text
-.
-├── prisma/
-│   ├── schema/
-│   │   ├── enums.prisma           # Global database enums
-│   │   ├── patient.prisma         # Patient model and relations
-│   │   ├── schema.prisma          # Datasource & Client configuration
-│   │   └── user.prisma            # User and authentication models
-│   └── migrations/                # Database migration history
-├── src/
-│   ├── app/
-│   │   ├── config/                # Environment configuration loader
-│   │   ├── lib/                   # Third-party integrations (Prisma, Redis, Cloudinary)
-│   │   ├── middleware/            # Auth guards, request validator, error handler
-│   │   ├── module/                # Domain-driven features (routes, controllers, services)
-│   │   └── templates/             # EJS templates for transactional emails
-│   ├── generated/
-│   │   └── prisma/                # Generated Prisma client output
-│   ├── utils/                     # Error helpers, async wrapper, response formats
-│   ├── app.ts                     # Express app setup and middleware pipeline
-│   └── server.ts                  # Server entry point and database connection logic
-├── .env.example                   # Sample environment configuration
-├── biome.json                     # Biome formatter & linter configuration
-├── package.json                   # Project dependencies and script runner
-└── tsconfig.json                  # TypeScript compiler settings
+The database uses multi-file schema modularity located in the `prisma/schema` directory to enforce clean boundaries:
+
+* **`user.prisma`**: Base user model storing credentials, authentication providers (`CREDENTIALS`, `GOOGLE`), roles, status, and verification state.
+* **`mentor.prisma`**: Extends approved users with professional domains, bios, experience, verification workflows, hourly rates, and aggregate ratings.
+* **`schedule.prisma`**: Stores mentor availability on designated dates, serving as the parent container for time slots.
+* **`slot.prisma`**: Discrete, atomic time blocks linked to schedules that track booking status (`isBooked`).
+* **`session.prisma`**: Manages booked consultations between a mentee and mentor, capturing meeting URLs, schedule metadata, and completion status.
+* **`payment.prisma`**: Handles billing records, bKash integration details, transaction IDs, platform fee splits, and refund tracking.
+* **`review.prisma`**: Stores mentee ratings and feedback for completed sessions, updating mentor score aggregates.
+* **`blog.prisma`**: Facilitates mentor-authored articles, rich content, and Cloudinary-hosted banner assets.
+* **`enums.prisma`**: Centralized definitions for status enums (e.g., `Role`, `SessionStatus`, `PaymentStatus`, `MentorshipStatus`).
+
+---
+
+## Architectural Modules
+
+The backend follows a modular feature architecture inside `src/module`:
+
+| Module | Core Responsibilities |
+|---|---|
+| **`auth`** | Handles user registration, credentials login, Google OAuth, password resets, and JWT issuance. |
+| **`user`** | Manages user profiles, role assignments, soft-delete operations, and administrative account moderation. |
+| **`mentor`** | Drives mentor onboarding, document submissions, admin verification workflows, and public directory filtering. |
+| **`schedule`** | Powers mentor availability creation, schedule configuration, and calendar management. |
+| **`slot`** | Handles discrete time-slot generation, availability queries, and conflict-detection engines. |
+| **`session`** | Governs booking lifecycles, session confirmation, cancellation logic, and meeting links. |
+| **`payment`** | Orchestrates bKash checkout workflows, webhook validations, fee deductions, and refund settlements. |
+| **`review`** | Processes ratings/feedback submissions and recalculates mentor average review scores. |
+| **`blog`** | Manages CRUD operations, image uploads, and public feed pagination for articles. |
+| **`analytics`** | Aggregates platform metrics, booking volumes, mentor earnings, and administrative dashboard reports. |
+
+---
+
+## Postman Documentation
+
+The complete API collection with environment configurations, route payloads, and edge cases is included in the project root:
+* **File:** `Adviso.postman_collection.json`
+* **Usage:** Open Postman -> **Import** -> Select `Adviso.postman_collection.json`.
+
+---
+
+## Getting Started
+
+1. Clone the repository and install dependencies:
+   ```bash
+   npm install

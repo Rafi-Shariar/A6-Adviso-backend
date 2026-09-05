@@ -1,0 +1,1711 @@
+{
+  "info": {
+    "_postman_id": "64b9178f-40f7-4aec-85a1-a31a5c26c8da",
+    "name": "Adviso",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "45061101",
+    "_collection_link": "https://go.postman.co/collection/45061101-64b9178f-40f7-4aec-85a1-a31a5c26c8da?source=collection_link"
+  },
+  "item": [
+    {
+      "name": "Auth",
+      "item": [
+        {
+          "name": "register user",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Rafi Shariar\",\n  \"email\": \"rafi.shariar@gmail.com\",\n  \"password\": \"Rafi1111\",\n  \"timezone\": \"Asia/Dhaka\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/auth/register",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "auth",
+                "register"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "verify email",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"otp\": \"905043\",\n  \"email\": \"rafi.shariar619@gmail.com\"\n\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/auth/verify-email",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "auth",
+                "verify-email"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "login",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "// Default User\n//{\n//   \"email\": \"user@gmail.com\",\n//   \"password\": \"User@user12345\"\n// }\n\n// Default Admin\n// {\n//   \"email\": \"admin@gmail.com\",\n//   \"password\": \"Admin@admin12345\"\n// }\n\n//Mentor\n// {\n//   \"email\": \"tahmid.rahman@example.com\",\n//   \"password\": \"Password123!\"\n// }\n",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/auth/login",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "auth",
+                "login"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "new tokens",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": ""
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/auth/refresh-token",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "auth",
+                "refresh-token"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "forgot password otp",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"email\": \"rafi.shariar619@gmail.com\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/auth/forgot-password",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "auth",
+                "forgot-password"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "reset password",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"email\": \"rafi.shariar619@gmail.com\",\n    \"otp\": \"279463\",\n    \"password\" : \"Rafi#9617\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/auth/reset-password",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "auth",
+                "reset-password"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "get me",
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          },
+          "request": {
+            "method": "GET",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": ""
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/auth/me",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "auth",
+                "me"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "google login",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"idToken\": \"<google-id-token-from-frontend-sign-in>\",\n    \"timezone\" : \"UTC\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/auth/google",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "auth",
+                "google"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Mentor",
+      "item": [
+        {
+          "name": "apply as mentor",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "resume",
+                  "type": "file",
+                  "uuid": "86a45c1f-ddc1-4a32-97f0-7ae195b48741",
+                  "src": "/Users/rafi_shariar/Downloads/Resume_of_Rafi_Shariar.pdf"
+                },
+                {
+                  "key": "documents",
+                  "type": "file",
+                  "uuid": "5cd3cff2-676d-432f-9820-e13ea0bcdea2",
+                  "src": "/Users/rafi_shariar/Downloads/React_and_Nextjs_Summary.pdf"
+                },
+                {
+                  "key": "data",
+                  "value": "{\n  \"headline\": \"Senior Full-Stack Engineer & System Architect\",\n  \"bio\": \"Passionate software engineer with over 5 years of experience building scalable distributed web applications, mentoring junior engineers, and conducting code reviews.\",\n  \"yearOfExperience\": 5,\n  \"expertiseTags\": [\n    \"Node.js\",\n    \"TypeScript\",\n    \"React\",\n    \"PostgreSQL\"\n  ],\n  \"linkedinURL\": \"https://www.linkedin.com/in/john-doe\",\n  \"professionalDomain\": \"Software Engineering\",\n  \"portfolioURL\": \"https://johndoe.dev\",\n  \"sessionCharge\": 45.00\n}",
+                  "type": "text",
+                  "uuid": "b9e46a20-b700-49d7-bb44-b2b6c4fefe78"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/mentor/applications/apply",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "mentor",
+                "applications",
+                "apply"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "approve application",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"mentorId\" : \"36b62bf2-2701-4b84-b845-86db56340f8a\",\n    \"verificationStatus\" : \"APPROVED\"\n\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/mentor/applications/approve",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "mentor",
+                "applications",
+                "approve"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "get featured mentors",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/mentor/featured",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "mentor",
+                "featured"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "get all mentors (public)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/mentor?sortBy=sessionCharge&sortOrder=\"Desc\"",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "mentor"
+              ],
+              "query": [
+                {
+                  "key": "limit",
+                  "value": "2",
+                  "type": "text",
+                  "disabled": true
+                },
+                {
+                  "key": "page",
+                  "value": "3",
+                  "type": "text",
+                  "disabled": true
+                },
+                {
+                  "key": "searchTerm",
+                  "value": "Farhana",
+                  "disabled": true
+                },
+                {
+                  "key": "professionalDomain",
+                  "value": "Software Engineering",
+                  "disabled": true
+                },
+                {
+                  "key": "sortBy",
+                  "value": "sessionCharge"
+                },
+                {
+                  "key": "sortOrder",
+                  "value": "\"Desc\""
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "get mentor profile details (public)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/mentor/190da0ee-5774-4978-8d94-8a89f5f545f2",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "mentor",
+                "190da0ee-5774-4978-8d94-8a89f5f545f2"
+              ],
+              "query": [
+                {
+                  "key": "limit",
+                  "value": "2",
+                  "type": "text",
+                  "disabled": true
+                },
+                {
+                  "key": "page",
+                  "value": "3",
+                  "type": "text",
+                  "disabled": true
+                },
+                {
+                  "key": "searchTerm",
+                  "value": "Civil",
+                  "type": "text",
+                  "disabled": true
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "get all mentor (admin)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/mentor/admin/all-mentors?verificationStatus=PENDING&searchTerm=david.ross@example.com",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "mentor",
+                "admin",
+                "all-mentors"
+              ],
+              "query": [
+                {
+                  "key": "verificationStatus",
+                  "value": "PENDING"
+                },
+                {
+                  "key": "searchTerm",
+                  "value": "david.ross@example.com"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "get mentor details (admin)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/mentor/admin/all-mentors/d8e9a02f-bfbc-4820-bb04-18ef6c400c92",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "mentor",
+                "admin",
+                "all-mentors",
+                "d8e9a02f-bfbc-4820-bb04-18ef6c400c92"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "change mentorship status",
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"status\" : \"BLOCKED\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/mentor/admin/all-mentors/d8e9a02f-bfbc-4820-bb04-18ef6c400c92",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "mentor",
+                "admin",
+                "all-mentors",
+                "d8e9a02f-bfbc-4820-bb04-18ef6c400c92"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "update mentor profile",
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"name\" : \"Rai vai\",\n    \"sessionCharge\" : 99.91\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/mentor/update-profile",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "mentor",
+                "update-profile"
+              ],
+              "query": [
+                {
+                  "key": "verificationStatus",
+                  "value": "PENDING",
+                  "disabled": true
+                }
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Schedule",
+      "item": [
+        {
+          "name": "create Schedule",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"date\": \"2026-09-15\",\n  \"startTime\": \"1970-01-01T01:00:00.000Z\",\n  \"endTime\": \"1970-01-01T02:30:00.000Z\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/schedule/create",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "schedule",
+                "create"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "get my schedules (mentor)",
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          },
+          "request": {
+            "method": "GET",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"slotId\" : \"787c9c4a-4f00-4c81-8120-3b8b689d92df\",\n    \"purpose\" : \"want to discuse about career\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/schedule/my-schedules",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "schedule",
+                "my-schedules"
+              ],
+              "query": [
+                {
+                  "key": "date",
+                  "value": "2026-09-14",
+                  "disabled": true
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "get all schedules (admin)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/schedule/admin/all-schedules?date=2026-09-14",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "schedule",
+                "admin",
+                "all-schedules"
+              ],
+              "query": [
+                {
+                  "key": "date",
+                  "value": "2026-09-14"
+                },
+                {
+                  "key": "searchTerm",
+                  "value": "Tahmid Has",
+                  "disabled": true
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "delete schedule",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"scheduleId\" : \"de7a9131-1c78-47d6-b3b5-fe1c5f0e0f3e\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/schedule/delete",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "schedule",
+                "delete"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Session",
+      "item": [
+        {
+          "name": "get Sessions of mentor",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/session/slots/",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "session",
+                "slots",
+                ""
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "book session",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"slotId\" : \"e144572c-c236-4f1b-b413-cb2f2187ead0\",\n    \"purpose\" : \"want to discuse about career\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/session/book",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "session",
+                "book"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "book session callback",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/session/book/payment/callback?paymentID=<bkash-payment-id>&status=success",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "session",
+                "book",
+                "payment",
+                "callback"
+              ],
+              "query": [
+                {
+                  "key": "paymentID",
+                  "value": "<bkash-payment-id>"
+                },
+                {
+                  "key": "status",
+                  "value": "success"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "get my session (user)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/session/my-sessions/",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "session",
+                "my-sessions",
+                ""
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "get my session details (user)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/session/my-sessions/d8b7811f-ca1f-4de4-9728-b2648ce51f58",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "session",
+                "my-sessions",
+                "d8b7811f-ca1f-4de4-9728-b2648ce51f58"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "get mentor sessions",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/session/mentor-sessions",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "session",
+                "mentor-sessions"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "get mentor session details",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/session/mentor-sessions/7ff9e0fd-48f9-4e2d-89d4-9b69be07b997",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "session",
+                "mentor-sessions",
+                "7ff9e0fd-48f9-4e2d-89d4-9b69be07b997"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "get all sessions (admin)",
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          },
+          "request": {
+            "method": "GET",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"slotId\" : \"787c9c4a-4f00-4c81-8120-3b8b689d92df\",\n    \"purpose\" : \"want to discuse about career\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/session/admin/all-sessions",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "session",
+                "admin",
+                "all-sessions"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "get session details (admin)",
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          },
+          "request": {
+            "method": "GET",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"slotId\" : \"787c9c4a-4f00-4c81-8120-3b8b689d92df\",\n    \"purpose\" : \"want to discuse about career\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/session/admin/all-sessions/7ff9e0fd-48f9-4e2d-89d4-9b69be07b997",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "session",
+                "admin",
+                "all-sessions",
+                "7ff9e0fd-48f9-4e2d-89d4-9b69be07b997"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "complete session",
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"sessionId\" : \"7ff9e0fd-48f9-4e2d-89d4-9b69be07b997\",\n    \"feedback\" : \"get more sleep\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/session/mark-complete",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "session",
+                "mark-complete"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "pay session",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"sessionId\" : \"7ff9e0fd-48f9-4e2d-89d4-9b69be07b997\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/session/pay-session",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "session",
+                "pay-session"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "cancel session",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"sessionId\" : \"f2c4c966-dde5-4dbe-acc6-40be73b8c4d3\",\n    \"cancellationReason\" : \"Feeling Bad\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/session/cancel",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "session",
+                "cancel"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Analytics",
+      "item": [
+        {
+          "name": "get platform analytics",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/analytics",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "analytics"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "get user analytics",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/analytics/user",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "analytics",
+                "user"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "admin analytics",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/analytics/admin",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "analytics",
+                "admin"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "mentor analytics",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/analytics/mentor",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "analytics",
+                "mentor"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Payments",
+      "item": [
+        {
+          "name": "get my payments",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/payment/my-payments",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "payment",
+                "my-payments"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "get payment details",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/payment/my-payments/409d1173-f051-4072-a715-020cfdcbaa48",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "payment",
+                "my-payments",
+                "409d1173-f051-4072-a715-020cfdcbaa48"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "get all payments (admin)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/payment/admin/all-payments",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "payment",
+                "admin",
+                "all-payments"
+              ],
+              "query": [
+                {
+                  "key": "status",
+                  "value": "REFUNDED",
+                  "type": "text",
+                  "disabled": true
+                },
+                {
+                  "key": "searchTerm",
+                  "value": "rafi.shariar619@gmail.com",
+                  "disabled": true
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "get payment details (admin)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/payment/admin/all-payments/8ebc25bf-4a52-413a-b729-9bd0ed51ab69",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "payment",
+                "admin",
+                "all-payments",
+                "8ebc25bf-4a52-413a-b729-9bd0ed51ab69"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Review",
+      "item": [
+        {
+          "name": "add review",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"sessionId\" : \"7ff9e0fd-48f9-4e2d-89d4-9b69be07b997\",\n    \"ratings\" : 4,\n    \"review\" : \"Had a great experience\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/review/add-review",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "review",
+                "add-review"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "homepage review",
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          },
+          "request": {
+            "method": "GET",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"sessionId\" : \"7ff9e0fd-48f9-4e2d-89d4-9b69be07b997\",\n    \"ratings\" : 4,\n    \"review\" : \"Had a great experience\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/review",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "review"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "my reviews",
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          },
+          "request": {
+            "method": "GET",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"sessionId\" : \"f2c4c966-dde5-4dbe-acc6-40be73b8c4d3\",\n    \"cancellationReason\" : \"Feeling Bad\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/review/my-reviews",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "review",
+                "my-reviews"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "mentor reviews",
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          },
+          "request": {
+            "method": "GET",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"sessionId\" : \"f2c4c966-dde5-4dbe-acc6-40be73b8c4d3\",\n    \"cancellationReason\" : \"Feeling Bad\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/review/mentor-reviews",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "review",
+                "mentor-reviews"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "get all reviews (admin)",
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          },
+          "request": {
+            "method": "GET",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"sessionId\" : \"f2c4c966-dde5-4dbe-acc6-40be73b8c4d3\",\n    \"cancellationReason\" : \"Feeling Bad\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/review/admin/all-reviews",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "review",
+                "admin",
+                "all-reviews"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "User",
+      "item": [
+        {
+          "name": "upload profile picture",
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "profileImage",
+                  "type": "file",
+                  "uuid": "a1bbea1d-7306-4415-bde9-f7c46ad0496b",
+                  "src": "/Users/rafi_shariar/Downloads/formalPhoto-RafiShariar.jpeg"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/user/profile-image",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "user",
+                "profile-image"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "get all users (admin)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/user/admin/all-user",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "user",
+                "admin",
+                "all-user"
+              ],
+              "query": [
+                {
+                  "key": "searchTerm",
+                  "value": "tahmid.rahman@example.com",
+                  "disabled": true
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "delete user (admin)",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/user/admin/delete-user/190da0ee-5774-4978-8d94-8a89f5f545f2",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "user",
+                "admin",
+                "delete-user",
+                "190da0ee-5774-4978-8d94-8a89f5f545f2"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "change user account status (admin)",
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"status\" : \"BLOCKED\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/user/admin/update-status/93cff976-c098-4a0b-8cde-c0c270dfe6b0",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "user",
+                "admin",
+                "update-status",
+                "93cff976-c098-4a0b-8cde-c0c270dfe6b0"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "blog",
+      "item": [
+        {
+          "name": "add blog",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"AI AI\",\n  \"content\": \"Building scalable backend architectures requires a firm grasp of relational databases, transactions, and robust schema validation. In this article, we explore best practices using Node.js, Prisma ORM, and Zod...\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/blog/add",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "blog",
+                "add"
+              ],
+              "query": [
+                {
+                  "key": "searchTerm",
+                  "value": null,
+                  "type": "text",
+                  "disabled": true
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "update blog",
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Roadmap to Becoming a Full-Stack MERN Developer in 2027\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/blog/update/01M1RCKSZH2TRXXWEEHC1414MM",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "blog",
+                "update",
+                "01M1RCKSZH2TRXXWEEHC1414MM"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "homepage blogs",
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          },
+          "request": {
+            "method": "GET",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Roadmap to Becoming a Full-Stack MERN Developer in 2026\",\n  \"content\": \"Building scalable backend architectures requires a firm grasp of relational databases, transactions, and robust schema validation. In this article, we explore best practices using Node.js, Prisma ORM, and Zod...\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/blog/featured-blogs",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "blog",
+                "featured-blogs"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "my blogs",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/blog/my-blogs",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "blog",
+                "my-blogs"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "all blogs admin",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/blog/all-blogs?searchTerm=190da0ee-5774-4978-8d94-8a89f5f545f2",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "blog",
+                "all-blogs"
+              ],
+              "query": [
+                {
+                  "key": "searchTerm",
+                  "value": "190da0ee-5774-4978-8d94-8a89f5f545f2"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "blog details",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/blog/01M1RCKSZH2TRXXWEEHC1414MM",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "blog",
+                "01M1RCKSZH2TRXXWEEHC1414MM"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "update banner image",
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "bannerImage",
+                  "type": "file",
+                  "uuid": "3f2b9aa3-5c89-4a57-beaf-0b20507eead3",
+                  "src": "/Users/rafi_shariar/Documents/Wallpapers/sebastian-svenson-d2w-_1LJioQ-unsplash.jpg"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/blog/banner-image/01M1SERQ7A2H75DQW2FXS6M4AS",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "blog",
+                "banner-image",
+                "01M1SERQ7A2H75DQW2FXS6M4AS"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "delete blog",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/blog/delete/01M1RCKSZH2TRXXWEEHC1414MM",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "blog",
+                "delete",
+                "01M1RCKSZH2TRXXWEEHC1414MM"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "all blogs for user",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/blog?searchTerm=Roadmap",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "blog"
+              ],
+              "query": [
+                {
+                  "key": "searchTerm",
+                  "value": "Roadmap",
+                  "type": "text"
+                }
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    }
+  ],
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "packages": {},
+        "requests": {},
+        "exec": [
+          ""
+        ]
+      }
+    },
+    {
+      "listen": "test",
+      "script": {
+        "type": "text/javascript",
+        "packages": {},
+        "requests": {},
+        "exec": [
+          ""
+        ]
+      }
+    }
+  ],
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "https://adviso-backend.vercel.app"
+    }
+  ]
+}
