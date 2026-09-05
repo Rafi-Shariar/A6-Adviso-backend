@@ -291,11 +291,10 @@ const getFeaturedMentors = async () => {
 };
 
 const getAllMentorsPublicList = async (query: Record<string, any>) => {
-	//TODO:include search on name
 
 	const { page, limit, skip, sortBy, sortOrder } = calculatePagination(query);
 
-	const searchOn = ["headline", "bio", "professionalDomain"];
+	const searchOn = ["headline", "bio", "professionalDomain" , "user.name"];
 	const filterBy = ["professionalDomain"];
 
 	const whereConditions = buildPrismaWhereConditions({

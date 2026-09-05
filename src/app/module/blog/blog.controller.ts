@@ -35,7 +35,7 @@ const updateBlog = catchAsync(async (req: Request, res: Response) => {
 const allBlogsForUser = catchAsync(async (req: Request, res: Response) => {
 	
 
-	const result = await BlogServices.allBlogsForUser();
+	const result = await BlogServices.allBlogsForUser(req.query);
 
 	sendResponse(res, {
 		statusCode: httpStatus.OK,
@@ -99,12 +99,12 @@ const myBlogs = catchAsync(async (req: Request, res: Response) => {
 const allBlogsForAdmin = catchAsync(async (req: Request, res: Response) => {
 	const user = req.user!;
 
-	const result = await BlogServices.allBlogsForAdmin(user);
+	const result = await BlogServices.allBlogsForAdmin(user, req.query);
 
 	sendResponse(res, {
 		statusCode: httpStatus.OK,
 		success: true,
-		message: "My blogs retrieved successfully",
+		message: "All blogs retrieved successfully",
 		data: result,
 	});
 });
@@ -129,6 +129,7 @@ const uploadBannerImage = catchAsync(async (req: Request, res: Response) => {
 		data: result,
 	});
 });
+
 export const BlogController = {
 	uploadBlog,
 	updateBlog,
