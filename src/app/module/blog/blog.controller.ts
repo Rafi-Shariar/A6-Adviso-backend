@@ -33,8 +33,6 @@ const updateBlog = catchAsync(async (req: Request, res: Response) => {
 });
 
 const allBlogsForUser = catchAsync(async (req: Request, res: Response) => {
-	
-
 	const result = await BlogServices.allBlogsForUser(req.query);
 
 	sendResponse(res, {
@@ -139,5 +137,5 @@ export const BlogController = {
 	myBlogs,
 	allBlogsForAdmin,
 	uploadBannerImage,
-	allBlogsForUser
+	allBlogsForUser,
 };

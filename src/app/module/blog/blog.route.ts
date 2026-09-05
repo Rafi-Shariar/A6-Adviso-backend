@@ -8,7 +8,7 @@ import { BlogController } from "./blog.controller";
 
 const router = Router();
 
-router.get('/', BlogController.allBlogsForUser)
+router.get("/", BlogController.allBlogsForUser);
 router.post("/add", auth(Role.MENTOR), BlogController.uploadBlog);
 router.patch(
 	"/banner-image/:blogId",

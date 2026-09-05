@@ -1,4 +1,5 @@
 import { Role } from "../../../generated/prisma/enums";
+import { buildPrismaWhereConditions } from "../../../helper/queryBuilder";
 import { prisma } from "../../lib/prisma";
 import { AppError } from "../../utils/AppError";
 import { IRequestUser } from "../auth/auth.interface";
@@ -126,7 +127,35 @@ export const createSchedule = async (
 	return result;
 };
 
-export const getMySchedulesMentor = async (user: IRequestUser) => {
+export const getMySchedulesMentor = async (
+	user: IRequestUser,
+	query: Record<string, any>,
+) => {
+	const andConditions: any[] = [
+		{ mentorId: user.userId },
+		{ isDeleted: false },
+	];
+
+	if (query.date) {
+		const startOfDay = new Date(query.date as string);
+		startOfDay.setUTCHours(0, 0, 0, 0);
+
+		const endOfDay = new Date(query.date as string);
+		endOfDay.setUTCHours(23, 59, 59, 999);
+
+		andConditions.push({
+			date: {
+				gte: startOfDay,
+				lte: endOfDay,
+			},
+		});
+	}
+
+	const whereConditions = buildPrismaWhereConditions({
+		query,
+		baseConditions: andConditions,
+	});
+
 	const isMentorValid = await prisma.mentor.findFirst({
 		where: {
 			mentorId: user.userId,
@@ -146,10 +175,7 @@ export const getMySchedulesMentor = async (user: IRequestUser) => {
 	}
 
 	const schedules = await prisma.schedule.findMany({
-		where: {
-			mentorId: user.userId,
-			isDeleted: false,
-		},
+		where: whereConditions,
 		include: {
 			slots: {
 				orderBy: {
@@ -165,7 +191,10 @@ export const getMySchedulesMentor = async (user: IRequestUser) => {
 	return schedules;
 };
 
-export const getAllSchedulesForAdmin = async (user: IRequestUser) => {
+export const getAllSchedulesForAdmin = async (
+	user: IRequestUser,
+	query: Record<string, any>,
+) => {
 	const isAdmin = await prisma.user.findFirst({
 		where: {
 			userId: user.userId,
@@ -177,10 +206,33 @@ export const getAllSchedulesForAdmin = async (user: IRequestUser) => {
 		throw new AppError(httpStatus.FORBIDDEN, "Access denied. Admin only.");
 	}
 
+	const andConditions: any[] = [{ isDeleted: false }];
+
+	if (query.date) {
+		const startOfDay = new Date(query.date as string);
+		startOfDay.setUTCHours(0, 0, 0, 0);
+
+		const endOfDay = new Date(query.date as string);
+		endOfDay.setUTCHours(23, 59, 59, 999);
+
+		andConditions.push({
+			date: {
+				gte: startOfDay,
+				lte: endOfDay,
+			},
+		});
+	}
+
+	const searchOn = ["mentor.user.name", "mentor.user.email"];
+
+	const whereConditions = buildPrismaWhereConditions({
+		query,
+		baseConditions: andConditions,
+		searchableFields: searchOn,
+	});
+
 	const schedules = await prisma.schedule.findMany({
-		where: {
-			isDeleted: false,
-		},
+		where: whereConditions,
 		include: {
 			mentor: {
 				select: {

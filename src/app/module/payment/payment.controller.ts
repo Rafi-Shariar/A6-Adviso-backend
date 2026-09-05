@@ -33,7 +33,7 @@ const getMyPaymentDetails = catchAsync(async (req: Request, res: Response) => {
 const getAllPayments = catchAsync(async (req: Request, res: Response) => {
 	const user = req.user!;
 
-	const result = await paymentServices.getAllPayments(user);
+	const result = await paymentServices.getAllPayments(user, req.query);
 	sendResponse(res, {
 		statusCode: httpStatus.OK,
 		success: true,

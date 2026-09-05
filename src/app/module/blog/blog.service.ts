@@ -108,54 +108,52 @@ export const updateBlog = async (
 };
 
 const allBlogsForUser = async (query: Record<string, any>) => {
+	const { page, limit, skip, sortBy, sortOrder } = calculatePagination(query);
+	const searchOn = ["title", "content", "mentor.user.name"];
 
-		const { page, limit, skip, sortBy, sortOrder } = calculatePagination(query);
-		const searchOn = ["title", "content", "mentor.user.name"]
+	const whereConditions = buildPrismaWhereConditions({
+		query,
+		searchableFields: searchOn,
+	});
 
-		const whereConditions = buildPrismaWhereConditions({
-				query,
-				searchableFields: searchOn,
-		});
-	
-	
 	const [blogs, total] = await Promise.all([
-    prisma.blog.findMany({
-      where: whereConditions,
-      skip,
-      take: limit,
-      orderBy: {
-        [sortBy]: sortOrder,
-      },
-      include: {
-        mentor: {
-          select: {
-            mentorId: true,
-            headline: true,
-            user: {
-              select: {
-                name: true,
-                email: true,
-                profileURL: true,
-              },
-            },
-          },
-        },
-      },
-    }),
-    prisma.blog.count({
-      where: whereConditions,
-    }),
-  ]);
+		prisma.blog.findMany({
+			where: whereConditions,
+			skip,
+			take: limit,
+			orderBy: {
+				[sortBy]: sortOrder,
+			},
+			include: {
+				mentor: {
+					select: {
+						mentorId: true,
+						headline: true,
+						user: {
+							select: {
+								name: true,
+								email: true,
+								profileURL: true,
+							},
+						},
+					},
+				},
+			},
+		}),
+		prisma.blog.count({
+			where: whereConditions,
+		}),
+	]);
 
 	return {
-    meta: {
-      page,
-      limit,
-      total,
-      totalPage: Math.ceil(total / limit),
-    },
-    data: blogs,
-  };
+		meta: {
+			page,
+			limit,
+			total,
+			totalPage: Math.ceil(total / limit),
+		},
+		data: blogs,
+	};
 };
 
 const deleteBlog = async (blogId: string, user: IRequestUser) => {
@@ -279,13 +277,15 @@ const myBlogs = async (user: IRequestUser) => {
 	return blogs;
 };
 
-const allBlogsForAdmin = async (user: IRequestUser, query: Record<string, any>) => {
-
-	const searchOn = ["title", "content", "mentor.user.name", "mentorId"]
+const allBlogsForAdmin = async (
+	user: IRequestUser,
+	query: Record<string, any>,
+) => {
+	const searchOn = ["title", "content", "mentor.user.name", "mentorId"];
 
 	const whereConditions = buildPrismaWhereConditions({
-				query,
-				searchableFields: searchOn,
+		query,
+		searchableFields: searchOn,
 	});
 
 	const isAdminOrSuperAdmin =
@@ -296,7 +296,7 @@ const allBlogsForAdmin = async (user: IRequestUser, query: Record<string, any>) 
 	}
 
 	const blogs = await prisma.blog.findMany({
-		where : whereConditions,
+		where: whereConditions,
 		orderBy: {
 			createdAt: "desc",
 		},
@@ -419,5 +419,5 @@ export const BlogServices = {
 	allBlogsForAdmin,
 	blogDetails,
 	uploadBlogBannerImage,
-	allBlogsForUser
+	allBlogsForUser,
 };

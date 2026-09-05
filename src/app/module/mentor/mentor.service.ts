@@ -291,10 +291,9 @@ const getFeaturedMentors = async () => {
 };
 
 const getAllMentorsPublicList = async (query: Record<string, any>) => {
-
 	const { page, limit, skip, sortBy, sortOrder } = calculatePagination(query);
 
-	const searchOn = ["headline", "bio", "professionalDomain" , "user.name"];
+	const searchOn = ["headline", "bio", "professionalDomain", "user.name"];
 	const filterBy = ["professionalDomain"];
 
 	const whereConditions = buildPrismaWhereConditions({
@@ -419,11 +418,9 @@ const getSingleMentorPublicProfile = async (mentorId: string) => {
 };
 
 const getAllMentorsAdminList = async (query: Record<string, any>) => {
-	//TODO:include search on name , email
-
 	const { page, limit, skip, sortBy, sortOrder } = calculatePagination(query);
 
-	const searchOn = ["headline", "bio"];
+	const searchOn = ["headline", "bio", "user.name", "user.email"];
 	const filterBy = [
 		"professionalDomain",
 		"verificationStatus",

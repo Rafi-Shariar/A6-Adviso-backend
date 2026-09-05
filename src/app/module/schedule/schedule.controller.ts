@@ -20,7 +20,7 @@ const createSchedule = catchAsync(async (req: Request, res: Response) => {
 const getMentorSchedules = catchAsync(async (req: Request, res: Response) => {
 	const user = req.user!;
 
-	const result = await ScheduleServices.getMySchedulesMentor(user);
+	const result = await ScheduleServices.getMySchedulesMentor(user, req.query);
 
 	sendResponse(res, {
 		statusCode: httpStatus.CREATED,
@@ -34,7 +34,10 @@ const getAllSchedulesForAdmin = catchAsync(
 	async (req: Request, res: Response) => {
 		const user = req.user!;
 
-		const result = await ScheduleServices.getAllSchedulesForAdmin(user);
+		const result = await ScheduleServices.getAllSchedulesForAdmin(
+			user,
+			req.query,
+		);
 
 		sendResponse(res, {
 			statusCode: httpStatus.CREATED,
