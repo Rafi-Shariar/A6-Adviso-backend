@@ -20,6 +20,7 @@ import { PaymentRoutes } from "./app/module/payment/payment.route";
 import { ReviewRoutes } from "./app/module/review/review.route";
 import { UserRoutes } from "./app/module/user/user.route";
 import { BlogRoutes } from "./app/module/blog/blog.route";
+import { globalLimiter } from "./app/utils/limiters";
 
 const app: Application = express();
 
@@ -56,6 +57,7 @@ app.get("/", async (req: Request, res: Response) => {
 	});
 });
 
+app.use(globalLimiter);
 app.use(globalErrorHandler);
 app.use(notFound);
 

@@ -4,11 +4,13 @@ import { AuthValidation } from "./auth.validation";
 import { AuthController } from "./auth.controller";
 import { auth } from "../../middleware/checkAuth";
 import { Role } from "../../../generated/prisma/enums";
+import { authLimiter } from "../../utils/limiters";
 
 const router = Router();
 
 router.post(
 	"/register",
+	authLimiter,
 	validateRequest(AuthValidation.registerZodSchema),
 	AuthController.registerUser,
 );
@@ -21,18 +23,20 @@ router.post(
 
 router.post(
 	"/login",
+	authLimiter,
 	validateRequest(AuthValidation.LoginZodSchema),
 	AuthController.loginUser,
 );
 
 router.post("/google", AuthController.googleLogin);
 
-router.post("/refresh-token", AuthController.refreshToken);
+router.post("/refresh-token",authLimiter, AuthController.refreshToken);
 
-router.post("/forgot-password", AuthController.forgotPassword);
+router.post("/forgot-password",authLimiter, AuthController.forgotPassword);
 
 router.post(
 	"/reset-password",
+	authLimiter,
 	validateRequest(AuthValidation.ResetPasswordZodSchema),
 	AuthController.resetPassword,
 );

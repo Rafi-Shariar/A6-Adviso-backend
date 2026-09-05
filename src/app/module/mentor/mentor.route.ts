@@ -6,11 +6,13 @@ import { MentorController } from "./mentor.controller";
 import { auth } from "../../middleware/checkAuth";
 import { Role } from "../../../generated/prisma/enums";
 import { MentorValidation } from "./mentor.validation";
+import { authLimiter } from "../../utils/limiters";
 
 const router = Router();
 
 router.post(
 	"/applications/apply",
+	authLimiter,
 	upload.fields([
 		{ name: "resume", maxCount: 1 },
 		{ name: "documents", maxCount: 5 },

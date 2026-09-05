@@ -5,12 +5,13 @@ import { SessionController } from "./session.controller";
 
 import { Role } from "../../../generated/prisma/enums";
 import { auth } from "../../middleware/checkAuth";
+import { authLimiter } from "../../utils/limiters";
 
 const router = Router();
 
 router.get("/slots/:mentorId", SessionController.getMentorAvailableSlots);
-router.post("/book", auth(Role.USER), SessionController.bookSession);
-router.post("/pay-session", auth(Role.USER), SessionController.paySession);
+router.post("/book",  auth(Role.USER), SessionController.bookSession);
+router.post("/pay-session", authLimiter, auth(Role.USER), SessionController.paySession);
 router.get("/book/payment/callback", SessionController.bookSessionCallback);
 router.post("/cancel", auth(Role.USER), SessionController.cancelSesionByUser);
 router.get("/my-sessions", auth(Role.USER), SessionController.getMySessionUser);
