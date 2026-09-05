@@ -15,9 +15,14 @@ export default {
 	jwt_access_expires_in: process.env.JWT_ACCESS_EXPIRES_IN!,
 	jwt_refresh_expires_in: process.env.JWT_REFRESH_EXPIRES_IN!,
 	google_client_id: process.env.GOOGLE_CLIENT_ID!,
+
 	super_admin_name: process.env.SUPER_ADMIN_NAME!,
 	super_admin_email: process.env.SUPER_ADMIN_EMAIL!,
 	super_admin_password: process.env.SUPER_ADMIN_PASSWORD!,
+
+	default_user_name: process.env.USER_NAME!,
+	default_user_email: process.env.USER_EMAIL!,
+	default_user_password: process.env.USER_PASSWORD!,
 
 	redis_user: process.env.REDIS_USER!,
 	redis_password: process.env.REDIS_PASSWORD!,

@@ -1,9 +1,10 @@
 import app from "./app";
 import config from "./app/config";
+import { releaseUnpaidSessionSlots } from "./app/lib/cron";
 import { transporter } from "./app/lib/nodemailer";
 import { prisma } from "./app/lib/prisma";
 import { redisClient } from "./app/lib/redis";
-import { seedMentors, seedSuperAdmin } from "./app/utils/seed";
+import { seedDefaultUser, seedMentors, seedSuperAdmin } from "./app/utils/seed";
 
 const PORT = config.port;
 
@@ -19,7 +20,11 @@ const main = async () => {
 		console.log("Nodemailer Connected Successfully.");
 
 		await seedSuperAdmin();
+		await seedDefaultUser();
 		await seedMentors();
+
+
+		await releaseUnpaidSessionSlots()
 
 		app.listen(PORT, () => {
 			console.log(`Server is running on port ${PORT}`);

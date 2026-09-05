@@ -108,6 +108,7 @@ const mentorsData = [
 		totalReviews: 29,
 	},
 ];
+
 export const seedSuperAdmin = async () => {
 	try {
 		const isSuperAdminExist = await prisma.user.findFirst({
@@ -223,4 +224,56 @@ export const seedMentors = async () => {
 	} catch (error) {
 		console.log("Error Seeding Mentors : ", error);
 	}
+};
+
+export const seedDefaultUser = async () => {
+    try {
+        const userEmail = config.default_user_email;
+
+        if (!userEmail) {
+            console.log("Default user email missing in config. Skipping user seed.");
+            return;
+        }
+
+        const isUserExist = await prisma.user.findUnique({
+            where: {
+                email: userEmail,
+            },
+        });
+
+        if (isUserExist) {
+            console.log("Default User Already Exists!");
+            return;
+        }
+
+        const name = config.default_user_name || "Demo User";
+        const password = config.default_user_password;
+
+        if (!password) {
+            throw new Error("Default User Password Missing In Env File!");
+        }
+
+        const hashedPassword = await bcrypt.hash(
+            password,
+            Number(config.bcrypt_salt_rounds),
+        );
+
+        const defaultUser = await prisma.user.create({
+            data: {
+                name,
+                email: userEmail,
+                password: hashedPassword,
+                role: Role.USER,
+                isEmailVerified: true,
+            },
+        });
+
+        console.log("Default User Created: ", {
+            userId: defaultUser.userId,
+            email: defaultUser.email,
+            role: defaultUser.role,
+        });
+    } catch (error) {
+        console.error("Error Seeding Default User: ", error);
+    }
 };
