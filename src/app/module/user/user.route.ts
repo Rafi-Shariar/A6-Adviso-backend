@@ -15,4 +15,21 @@ router.patch(
 	UserController.uploadProfileImage,
 );
 
+router.get(
+	"/admin/all-user",
+	auth(Role.SUPER_ADMIN, Role.ADMIN),
+	UserController.getAllUsers,
+);
+
+router.delete(
+	"/admin/delete-user/:userId",
+	auth(Role.SUPER_ADMIN, Role.ADMIN),
+	UserController.deleteUser,
+);
+
+router.patch(
+	"/admin/update-status/:userId",
+	auth(Role.SUPER_ADMIN, Role.ADMIN),
+	UserController.updateUserStatus,
+);
 export const UserRoutes = router;
