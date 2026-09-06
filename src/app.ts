@@ -21,9 +21,11 @@ import { ReviewRoutes } from "./app/module/review/review.route";
 import { UserRoutes } from "./app/module/user/user.route";
 import { BlogRoutes } from "./app/module/blog/blog.route";
 import { globalLimiter } from "./app/utils/limiters";
+import { applySecurityHeaders } from "./app/utils/secuirityHeaders";
 
 const app: Application = express();
-
+app.disable("x-powered-by");
+app.use(applySecurityHeaders());
 app.use(
 	cors({
 		origin: config.frontend_url,
@@ -38,6 +40,16 @@ app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 app.use(cookieParser());
 
+app.use(globalLimiter);
+
+// Basic route
+app.get("/", async (req: Request, res: Response) => {
+	res.status(httpStatus.OK).json({
+		success: true,
+		message: "Welcome to Adviso Backend",
+	});
+});
+
 //routes
 app.use("/api/v1/auth", AuthRoutes);
 app.use("/api/v1/mentor", MentorRoutes);
@@ -49,16 +61,9 @@ app.use("/api/v1/review", ReviewRoutes);
 app.use("/api/v1/user", UserRoutes);
 app.use("/api/v1/blog", BlogRoutes);
 
-// Basic route
-app.get("/", async (req: Request, res: Response) => {
-	res.status(httpStatus.OK).json({
-		success: true,
-		message: "Welcome to Adviso Backend",
-	});
-});
 
-app.use(globalLimiter);
-app.use(globalErrorHandler);
+
 app.use(notFound);
+app.use(globalErrorHandler);
 
 export default app;
