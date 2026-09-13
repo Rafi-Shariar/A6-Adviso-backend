@@ -47,4 +47,10 @@ router.get(
 	AuthController.getMe,
 );
 
+router.post(
+	"/logout",
+	auth(Role.ADMIN, Role.MENTOR, Role.SUPER_ADMIN, Role.USER),
+	AuthController.logout,
+);
+
 export const AuthRoutes = router;

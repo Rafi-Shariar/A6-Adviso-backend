@@ -5,6 +5,7 @@ import { catchAsync } from "../../utils/catchAsync";
 import { sendResponse } from "../../utils/sendResponse";
 import { AuthServices } from "./auth.service";
 import { IRequestUser } from "./auth.interface";
+import config from "../../config";
 
 const registerUser = catchAsync(async (req: Request, res: Response) => {
 	const payload = req.body;
@@ -25,14 +26,14 @@ const verifyEmail = catchAsync(async (req: Request, res: Response) => {
 
 	res.cookie("accessToken", accessToken, {
 		httpOnly: true,
-		secure: false,
-		sameSite: "none",
+		secure: config.node_env === "development" ? false : true,
+		sameSite: config.node_env === "development" ? "lax" : "none",
 		maxAge: 1000 * 60 * 60 * 24, // 24 hour or 1 day
 	});
 	res.cookie("refreshToken", refreshToken, {
 		httpOnly: true,
-		secure: false,
-		sameSite: "none",
+		secure: config.node_env === "development" ? false : true,
+		sameSite: config.node_env === "development" ? "lax" : "none",
 		maxAge: 1000 * 60 * 60 * 24 * 7, // 7 days
 	});
 
@@ -51,14 +52,14 @@ const loginUser = catchAsync(async (req: Request, res: Response) => {
 
 	res.cookie("accessToken", accessToken, {
 		httpOnly: true,
-		secure: false,
-		sameSite: "none",
+		secure: config.node_env === "development" ? false : true,
+		sameSite: config.node_env === "development" ? "lax" : "none",
 		maxAge: 1000 * 60 * 60 * 24, // 24 hour or 1 day
 	});
 	res.cookie("refreshToken", refreshToken, {
 		httpOnly: true,
-		secure: false,
-		sameSite: "none",
+		secure: config.node_env === "development" ? false : true,
+		sameSite: config.node_env === "development" ? "lax" : "none",
 		maxAge: 1000 * 60 * 60 * 24 * 7, // 7 days
 	});
 
@@ -82,14 +83,14 @@ const refreshToken = catchAsync(async (req: Request, res: Response) => {
 
 	res.cookie("accessToken", accessToken, {
 		httpOnly: true,
-		secure: false,
-		sameSite: "none",
+		secure: config.node_env === "development" ? false : true,
+		sameSite: config.node_env === "development" ? "lax" : "none",
 		maxAge: 1000 * 60 * 60 * 24, // 24 hour or 1 day
 	});
 	res.cookie("refreshToken", newRefreshToken, {
 		httpOnly: true,
-		secure: false,
-		sameSite: "none",
+		secure: config.node_env === "development" ? false : true,
+		sameSite: config.node_env === "development" ? "lax" : "none",
 		maxAge: 1000 * 60 * 60 * 24 * 7, // 7 days
 	});
 
@@ -158,14 +159,14 @@ const googleLogin = catchAsync(async (req: Request, res: Response) => {
 
 	res.cookie("accessToken", accessToken, {
 		httpOnly: true,
-		secure: false,
-		sameSite: "none",
+		secure: config.node_env === "development" ? false : true,
+		sameSite: config.node_env === "development" ? "lax" : "none",
 		maxAge: 1000 * 60 * 60 * 24, // 24 hour or 1 day
 	});
 	res.cookie("refreshToken", refreshToken, {
 		httpOnly: true,
-		secure: false,
-		sameSite: "none",
+		secure: config.node_env === "development" ? false : true,
+		sameSite: config.node_env === "development" ? "lax" : "none",
 		maxAge: 1000 * 60 * 60 * 24 * 7, // 7 days
 	});
 
@@ -180,6 +181,22 @@ const googleLogin = catchAsync(async (req: Request, res: Response) => {
 	});
 });
 
+const logout = catchAsync(async (req: Request, res: Response) => {
+	
+
+	res.clearCookie("accessToken")
+	res.clearCookie("refreshToken")
+
+
+	sendResponse(res, {
+		statusCode: httpStatus.OK,
+		success: true,
+		message: "logout Successful",
+		data: null
+	});
+});
+
+
 export const AuthController = {
 	registerUser,
 	verifyEmail,
@@ -189,4 +206,5 @@ export const AuthController = {
 	resetPassword,
 	getMe,
 	googleLogin,
+	logout
 };

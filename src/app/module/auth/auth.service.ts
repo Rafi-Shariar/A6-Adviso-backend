@@ -21,7 +21,6 @@ import {
 	AuthProvider,
 	Role,
 } from "../../../generated/prisma/enums";
-import { ILoginUserPayloadExample } from "../example/example.interface";
 import { jwtUtils } from "../../utils/jwt";
 import { JwtPayload, SignOptions } from "jsonwebtoken";
 import { getActiveUserByEmailOrThrow } from "../../../helper/isValidUser";
@@ -477,7 +476,8 @@ const googleLogin = async (payload: IGoogleLoginPayload) => {
 					email: googleIdTokenPayload.email,
 					googleId: googleIdTokenPayload.sub,
 					authProvider: AuthProvider.GOOGLE,
-					emailVerified: true,
+					profileURL : googleIdTokenPayload.picture,
+					isEmailVerified: true,
 					timezone: payload.timezone || "UTC",
 				},
 			});

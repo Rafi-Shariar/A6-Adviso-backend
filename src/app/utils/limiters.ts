@@ -17,7 +17,7 @@ export const globalLimiter = rateLimit({
 // ২. অথেনটিকেশন বা সেনসিটিভ রুটের জন্য কঠোর লিমিটার: ১৫ মিনিটে সর্বোচ্চ ৫ বার
 export const authLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // ১৫ মিনিট
-  max: 5, // প্রতি IP থেকে ১৫ মিনিটে মাত্র ৫ বার চেষ্টা করা যাবে
+  max: 20, // প্রতি IP থেকে ১৫ মিনিটে মাত্র ৫ বার চেষ্টা করা যাবে
   standardHeaders: true,
   legacyHeaders: false,
   message: {
