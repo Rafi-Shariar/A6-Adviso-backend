@@ -9,7 +9,7 @@ import { IRequestUser } from "../auth/auth.interface";
 import httpStatus from "http-status";
 
 export const getPlatformAnalytics = async () => {
-	const [totalUsers, totalMentors, completedSessions] = await Promise.all([
+	const [totalUsers, totalMentors, completedSessions, avgReview] = await Promise.all([
 		prisma.user.count({
 			where: {
 				role: Role.USER,
@@ -34,6 +34,12 @@ export const getPlatformAnalytics = async () => {
 				endUTC: true,
 			},
 		}),
+
+		prisma.review.aggregate({
+			_avg : {
+				ratings : true
+			}
+		})
 	]);
 
 	const totalMilliseconds = completedSessions.reduce((acc, session) => {
@@ -50,6 +56,8 @@ export const getPlatformAnalytics = async () => {
 		totalUsers,
 		totalMentors,
 		totalSessionHours,
+		averageReview : avgReview._avg.ratings ?? 0
+
 	};
 };
 
