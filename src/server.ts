@@ -5,6 +5,9 @@ import { transporter } from "./app/lib/nodemailer";
 import { prisma } from "./app/lib/prisma";
 import { redisClient } from "./app/lib/redis";
 import { seedDefaultUser, seedMentors, seedSuperAdmin } from "./app/utils/seed";
+import { seedBlogs } from "./app/utils/seedBlogs";
+import { seedSchedulesAndSessions } from "./app/utils/seedSchedules";
+
 
 const PORT = config.port;
 
@@ -22,6 +25,8 @@ const main = async () => {
 		await seedSuperAdmin();
 		await seedDefaultUser();
 		await seedMentors();
+		await seedSchedulesAndSessions();
+		await seedBlogs();
 
 
 		await releaseUnpaidSessionSlots()
