@@ -79,10 +79,12 @@ const getAllUser = async (user: IRequestUser, query: Record<string, any>) => {
 	const { page, limit, skip, sortBy, sortOrder } = calculatePagination(query);
 
 	const searchOn = ["name", "email"];
+	const fllterBy = ["role", "accountStatus"]
 
 	const whereConditions = buildPrismaWhereConditions({
 		query,
 		searchableFields: searchOn,
+		filterableFields : fllterBy,
 		baseConditions: [{ isDeleted: false }],
 	});
 
