@@ -383,6 +383,7 @@ const getSingleMentorPublicProfile = async (mentorId: string) => {
 				take: 4,
 				orderBy: { createdAt: "desc" },
 				select: {
+					blogId : true,
 					bannerImage: true,
 					title: true,
 					createdAt: true,
@@ -394,7 +395,6 @@ const getSingleMentorPublicProfile = async (mentorId: string) => {
 				select: {
 					ratings: true,
 					comment: true,
-					createdAt: true,
 					session: {
 						select: {
 							user: {
@@ -418,6 +418,7 @@ const getSingleMentorPublicProfile = async (mentorId: string) => {
 };
 
 const getAllMentorsAdminList = async (query: Record<string, any>) => {
+	
 	const { page, limit, skip, sortBy, sortOrder } = calculatePagination(query);
 
 	const searchOn = ["headline", "bio", "user.name", "user.email"];
