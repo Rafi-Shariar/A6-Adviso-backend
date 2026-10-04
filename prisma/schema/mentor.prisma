@@ -13,7 +13,7 @@ model Mentor {
     resumePublicId String?
     sessionCharge Decimal @db.Decimal(10,2)
     documents Json
-    mentorshipStatus MentorshipStatus @default(OPEN)
+    mentorshipStatus MentorshipStatus @default(BLOCKED)
 
     verificationStatus VerificationStatus @default(PENDING)
     rejectionReason String?

@@ -220,12 +220,14 @@ const approveMentorApplications = async (
 		},
 		data: {
 			verificationStatus,
+			mentorshipStatus : verificationStatus === VerificationStatus.APPROVED ? "OPEN" : "BLOCKED",
 			rejectionReason:
 				verificationStatus === VerificationStatus.REJECTED
 					? rejectionReason
 					: null,
 			reviewedBy: reviewer.userId,
 			reviewedAt: new Date(),
+
 		},
 		include: {
 			user: {
