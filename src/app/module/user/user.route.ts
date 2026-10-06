@@ -32,4 +32,6 @@ router.patch(
 	auth(Role.SUPER_ADMIN, Role.ADMIN),
 	UserController.updateUserStatus,
 );
+
+router.get('/application-status', auth(Role.USER), UserController.getApplicationStatus)
 export const UserRoutes = router;

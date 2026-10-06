@@ -116,6 +116,7 @@ const applyAsMentor = async (
 		rejectionReason: null,
 		reviewedBy: null,
 		reviewedAt: null,
+		mentorshipStatus : MentorshipStatus.BLOCKED,
 		documents: additionalFilesUploadResults.map((file) => ({
 			url: file.secure_url,
 			publicId: file.public_id,

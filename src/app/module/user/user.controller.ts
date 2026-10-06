@@ -4,6 +4,7 @@ import { AppError } from "../../utils/AppError";
 import { catchAsync } from "../../utils/catchAsync";
 import { sendResponse } from "../../utils/sendResponse";
 import { UserServices } from "./user.service";
+import { IRequestUser } from "../auth/auth.interface";
 
 const uploadProfileImage = catchAsync(async (req: Request, res: Response) => {
 	if (!req.file) {
@@ -66,9 +67,29 @@ const updateUserStatus = catchAsync(async (req: Request, res: Response) => {
 	});
 });
 
+
+const getApplicationStatus = catchAsync(async (req: Request, res: Response) => {
+	const user = req.user as IRequestUser;
+
+	if (!user) {
+		throw new AppError(
+			httpStatus.UNAUTHORIZED,
+			"User information is missing in the request",
+		);
+	}
+
+	const result = await UserServices.getApplicationStatus(user);
+	sendResponse(res, {
+		statusCode: httpStatus.OK,
+		success: true,
+		message: "Application Status fetched successfully",
+		data: result,
+	});
+});
 export const UserController = {
 	uploadProfileImage,
 	getAllUsers,
 	deleteUser,
 	updateUserStatus,
+	getApplicationStatus
 };

@@ -241,9 +241,25 @@ export const updateUserStatus = async (
 	return updatedUser;
 };
 
+const getApplicationStatus = async (user: IRequestUser) => {
+
+	const application = await prisma.mentor.findUnique({
+		where: {
+			mentorId: user.userId,
+		}
+	});
+
+	if (!application) {
+		throw new AppError(httpStatus.NOT_FOUND, "Application not found");
+	}
+
+	return application;
+};
+
 export const UserServices = {
 	uploadProfileImage,
 	getAllUser,
 	DeleteUser,
 	updateUserStatus,
+	getApplicationStatus
 };
