@@ -82,7 +82,7 @@ const getApplicationStatus = catchAsync(async (req: Request, res: Response) => {
 	sendResponse(res, {
 		statusCode: httpStatus.OK,
 		success: true,
-		message: "Application Status fetched successfully",
+		message: result ? "Application status fetched successfully" : "No application found",
 		data: result,
 	});
 });

@@ -249,10 +249,6 @@ const getApplicationStatus = async (user: IRequestUser) => {
 		}
 	});
 
-	if (!application) {
-		throw new AppError(httpStatus.NOT_FOUND, "Application not found");
-	}
-
 	return application;
 };
 
