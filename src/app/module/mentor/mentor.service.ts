@@ -12,6 +12,7 @@ import { prisma } from "../../lib/prisma";
 import { IRegisterUser, IRequestUser } from "../auth/auth.interface";
 import {
 	MentorshipStatus,
+	Role,
 	VerificationStatus,
 } from "../../../generated/prisma/enums";
 import { RequestUser } from "../../middleware/checkAuth";
@@ -179,95 +180,114 @@ const applyAsMentor = async (
 };
 
 const approveMentorApplications = async (
-	paylaod: IApproveMentorPayload,
-	reviewer: RequestUser,
+    payload: IApproveMentorPayload,
+    reviewer: RequestUser,
 ) => {
-	const { mentorId, verificationStatus, rejectionReason } = paylaod;
+    const { mentorId, verificationStatus, rejectionReason } = payload;
 
-	const existingMentor = await prisma.mentor.findUnique({
-		where: {
-			mentorId: mentorId,
-		},
-		include: {
-			user: true,
-		},
-	});
+    const existingMentor = await prisma.mentor.findUnique({
+        where: {
+            mentorId: mentorId,
+        },
+        include: {
+            user: true,
+        },
+    });
 
-	if (!existingMentor) {
-		throw new AppError(httpStatus.NOT_FOUND, "Mentor application not found.");
-	}
+    if (!existingMentor) {
+        throw new AppError(httpStatus.NOT_FOUND, "Mentor application not found.");
+    }
 
-	if (
-		existingMentor.user.accountStatus === "BLOCKED" ||
-		existingMentor.user.accountStatus === "SUSPENDED"
-	) {
-		throw new AppError(httpStatus.GONE, "User account is desabled.");
-	}
+    if (
+        existingMentor.user.accountStatus === "BLOCKED" ||
+        existingMentor.user.accountStatus === "SUSPENDED"
+    ) {
+        throw new AppError(httpStatus.GONE, "User account is disabled.");
+    }
 
-	if (existingMentor.isDeleted) {
-		throw new AppError(httpStatus.GONE, "Application has been deleted.");
-	}
+    if (existingMentor.isDeleted) {
+        throw new AppError(httpStatus.GONE, "Application has been deleted.");
+    }
 
-	if (existingMentor.verificationStatus !== "PENDING") {
-		throw new AppError(
-			httpStatus.CONFLICT,
-			`Application has been already ${existingMentor.verificationStatus.toLocaleLowerCase()}`,
-		);
-	}
+    if (existingMentor.verificationStatus !== "PENDING") {
+        throw new AppError(
+            httpStatus.CONFLICT,
+            `Application has been already ${existingMentor.verificationStatus.toLowerCase()}`,
+        );
+    }
 
-	const updatedMentor = await prisma.mentor.update({
-		where: {
-			mentorId: mentorId,
-		},
-		data: {
-			verificationStatus,
-			mentorshipStatus : verificationStatus === VerificationStatus.APPROVED ? "OPEN" : "BLOCKED",
-			rejectionReason:
-				verificationStatus === VerificationStatus.REJECTED
-					? rejectionReason
-					: null,
-			reviewedBy: reviewer.userId,
-			reviewedAt: new Date(),
+    const isApproved = verificationStatus === VerificationStatus.APPROVED;
 
-		},
-		include: {
-			user: {
-				select: {
-					name: true,
-					email: true,
-				},
-			},
-		},
-	});
+    // Prisma Transaction ব্যবহার করে দুটো টেবিলেই অ্যাটোমিক আপডেট নিশ্চিত করা
+    const updatedMentor = await prisma.$transaction(async (tx) => {
+        // ১. মেন্টর রেকর্ড আপডেট
+        const mentor = await tx.mentor.update({
+            where: {
+                mentorId: mentorId,
+            },
+            data: {
+                verificationStatus,
+                mentorshipStatus: isApproved ? "OPEN" : "BLOCKED",
+                rejectionReason:
+                    verificationStatus === VerificationStatus.REJECTED
+                        ? rejectionReason
+                        : null,
+                reviewedBy: reviewer.userId,
+                reviewedAt: new Date(),
+            },
+            include: {
+                user: {
+                    select: {
+                        userId: true,
+                        name: true,
+                        email: true,
+                    },
+                },
+            },
+        });
 
-	const isApproved = verificationStatus === VerificationStatus.APPROVED;
+        // ২. যদি অ্যাপ্রুভ হয়, তবে ইউজারের রোল 'MENTOR' করা
+        if (isApproved) {
+            await tx.user.update({
+                where: {
+                    userId: existingMentor.mentorId, // আপনার স্কিমার ফরেন কি ফিল্ড অনুযায়ী
+                },
+                data: {
+                    role: Role.MENTOR, // বা "MENTOR"
+                },
+            });
+        }
 
-	const tempatePath = path.join(
-		process.cwd(),
-		`src/app/templates/${
-			isApproved
-				? "mentor-application-approved.ejs"
-				: "mentor-application-rejected.ejs"
-		}`,
-	);
+        return mentor;
+    });
 
-	const templateData = {
-		name: updatedMentor.user.name,
-		reason: updatedMentor.rejectionReason,
-	};
+    // ইমেইল নোটিফিকেশন হ্যান্ডলিং
+    const templatePath = path.join(
+        process.cwd(),
+        `src/app/templates/${
+            isApproved
+                ? "mentor-application-approved.ejs"
+                : "mentor-application-rejected.ejs"
+        }`,
+    );
 
-	const html = await ejs.renderFile(tempatePath, templateData);
+    const templateData = {
+        name: updatedMentor.user.name,
+        reason: updatedMentor.rejectionReason,
+    };
 
-	await transporter.sendMail({
-		from: config.email_sender,
-		to: updatedMentor.user.email,
-		subject: isApproved
-			? "ADVISO - Your Mentor Application Has Been Approved"
-			: "ADVISO - Your Mentor Application Has Been Rejected",
-		html,
-	});
+    const html = await ejs.renderFile(templatePath, templateData);
 
-	return updatedMentor;
+    await transporter.sendMail({
+        from: config.email_sender,
+        to: updatedMentor.user.email,
+        subject: isApproved
+            ? "ADVISO - Your Mentor Application Has Been Approved"
+            : "ADVISO - Your Mentor Application Has Been Rejected",
+        html,
+    });
+
+    return updatedMentor;
 };
 
 const getFeaturedMentors = async () => {
