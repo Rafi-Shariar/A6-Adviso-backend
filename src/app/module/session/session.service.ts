@@ -19,6 +19,7 @@ import { generateSessionInvoicePDF } from "../../../helper/generateInvoicePDF";
 import { transporter } from "../../lib/nodemailer";
 
 import { RequestUser } from "../../middleware/checkAuth";
+import crypto from "crypto";
 
 const getMentorAvailableSlots = async (mentorId: string) => {
 	const today = new Date();
@@ -152,6 +153,8 @@ const bookSession = async (
 				);
 			}
 
+			const merchantInvoice = `TRX-${Date.now()}-${crypto.randomBytes(3).toString("hex").toUpperCase()}`;
+
 			const bkashCreatePaymentResponse = await fetch(
 				`${config.bkash_base_url}/tokenized/checkout/create`,
 				{
@@ -169,7 +172,7 @@ const bookSession = async (
 						amount: slot.schedule.mentor.sessionCharge,
 						currency: "BDT",
 						intent: "sale",
-						merchantInvoiceNumber: slot.slotId,
+						merchantInvoiceNumber: merchantInvoice,
 					}),
 				},
 			);
@@ -189,7 +192,7 @@ const bookSession = async (
 
 			await tx.payment.create({
 				data: {
-					transactionId: bkashCreatePaymentResult.merchantInvoiceNumber,
+					transactionId: merchantInvoice,
 					sessionId: session.sessionId,
 					amount: slot.schedule.mentor.sessionCharge,
 					gatewayResponse: bkashCreatePaymentResult,

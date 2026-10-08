@@ -27,7 +27,7 @@ router.get(
 );
 router.get(
 	"/admin/all-reviews",
-	auth(Role.USER),
+	auth(Role.ADMIN, Role.SUPER_ADMIN),
 	ReviewController.getAllReviewsAdmin,
 );
 
