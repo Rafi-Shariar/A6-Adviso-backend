@@ -36,6 +36,12 @@ router.patch(
 	MentorController.updateMentorProfile,
 );
 
+router.get(
+	"/mentor/me",
+	auth(Role.MENTOR),
+	MentorController.getMentorProfile,
+);
+
 //admin routes
 router.get(
 	"/admin/all-mentors",

@@ -535,6 +535,21 @@ const changeMentorshipStatus = async (
 	});
 };
 
+const getMentorProfile = async (user: IRequestUser) => {
+	const isMentorExist = await prisma.mentor.findUnique({
+		where: {
+			mentorId: user.userId,
+			
+		}
+	});
+
+	if (!isMentorExist) {
+		throw new AppError(httpStatus.NOT_FOUND, "Mentor not found");
+	}
+
+	return isMentorExist;
+};
+
 const updateMentorProfile = async (
 	mentorId: string,
 	payload: IMentorProfileUpdatePayload,
@@ -597,4 +612,5 @@ export const mentorServices = {
 	getSingleMentorAdminProfile,
 	changeMentorshipStatus,
 	updateMentorProfile,
+	getMentorProfile
 };

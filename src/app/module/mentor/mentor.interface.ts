@@ -20,7 +20,6 @@ export interface IApproveMentorPayload {
 export interface IMentorProfileUpdatePayload {
 	name?: string;
 	timezone?: string;
-
 	headline?: string;
 	bio?: string;
 	yearOfExperience?: number;

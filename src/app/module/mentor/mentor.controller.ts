@@ -143,6 +143,28 @@ const changeMentorshipStatus = catchAsync(
 	},
 );
 
+
+const getMentorProfile = catchAsync(async (req: Request, res: Response) => {
+	const user = req.user as IRequestUser;
+
+	if (!user) {
+		throw new AppError(
+			httpStatus.UNAUTHORIZED,
+			"User information is missing in the request",
+		);
+	}
+
+	const result = await mentorServices.getMentorProfile(user);
+	sendResponse(res, {
+		statusCode: httpStatus.OK,
+		success: true,
+		message: "Mentor profile fetched successfully",
+		data: result,
+	});
+});
+
+
+
 const updateMentorProfile = catchAsync(async (req: Request, res: Response) => {
 	const mentorId = req.user?.userId as string;
 
@@ -166,4 +188,5 @@ export const MentorController = {
 	getSingleMentorAdminProfile,
 	changeMentorshipStatus,
 	updateMentorProfile,
+	getMentorProfile
 };
