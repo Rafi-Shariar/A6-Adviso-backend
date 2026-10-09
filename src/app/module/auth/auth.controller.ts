@@ -6,6 +6,7 @@ import { sendResponse } from "../../utils/sendResponse";
 import { AuthServices } from "./auth.service";
 import { IRequestUser } from "./auth.interface";
 import config from "../../config";
+import { path } from "pdfkit";
 
 const registerUser = catchAsync(async (req: Request, res: Response) => {
 	const payload = req.body;
@@ -182,11 +183,16 @@ const googleLogin = catchAsync(async (req: Request, res: Response) => {
 });
 
 const logout = catchAsync(async (req: Request, res: Response) => {
+
+	const cookieOptions = {
+        httpOnly: true,
+        secure: config.node_env === "development" ? false : true,
+        sameSite: (config.node_env === "development" ? "lax" : "none") as "lax" | "none",
+        path: "/"
+    };
 	
-
-	res.clearCookie("accessToken")
-	res.clearCookie("refreshToken")
-
+	res.clearCookie("accessToken", cookieOptions)
+	res.clearCookie("refreshToken", cookieOptions)
 
 	sendResponse(res, {
 		statusCode: httpStatus.OK,

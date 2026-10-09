@@ -331,7 +331,7 @@ const bookSessionCallback = async (query: Record<string, any>) => {
 		});
 
 		return {
-			redirectURL: `${config.frontend_url}/dashboard/my-sessions?status=${status}`,
+			redirectURL: `${config.frontend_url}/user/sessions?status=${status}`,
 		};
 	}
 
@@ -379,7 +379,7 @@ const bookSessionCallback = async (query: Record<string, any>) => {
 		});
 
 		return {
-			redirectURL: `${config.frontend_url}/dashboard/my-sessions?status=failed`,
+			redirectURL: `${config.frontend_url}/user/sessions?status=failed`,
 		};
 	}
 
@@ -497,7 +497,7 @@ const bookSessionCallback = async (query: Record<string, any>) => {
 	}
 
 	return {
-		redirectURL: `${config.frontend_url}/dashboard/my-sessions?status=success`,
+		redirectURL: `${config.frontend_url}/user/sessions?status=success`,
 	};
 };
 
